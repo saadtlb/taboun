@@ -1,6 +1,7 @@
 import chess
 
-from TabounV1 import TabounV1
+from bot.tabounv1 import tabounV1
+from bot.tabounv2 import tabounV2
 
 
 def prompt_player_move(board: chess.Board) -> chess.Move | None:
@@ -44,10 +45,20 @@ def describe_outcome(board: chess.Board) -> str:
     return f"Le bot gagne ({outcome.termination.name.lower()})."
 
 
+def select_bot():
+    while True:
+        choice = input("Choisis le bot: 1) tabounV1 (random)  2) tabounV2 (minimax): ").strip()
+        if choice == "1":
+            return tabounV1()
+        if choice == "2":
+            return tabounV2()
+        print("Choix invalide. Tape 1 ou 2.")
+
+
 def main() -> None:
     board = chess.Board()
-    bot = TabounV1()
-    print("Bienvenue ! Vous jouez les blancs contre un bot aleatoire.\n")
+    bot = select_bot()
+    print("Bienvenue ! Vous jouez les blancs contre un bot.\n")
 
     while not board.is_game_over():
         print(board)

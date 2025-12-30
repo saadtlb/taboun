@@ -2,7 +2,7 @@ import random
 import chess
 
 
-class TabounV1:
+class tabounV1:
     """Bot that selects a random legal move on the given board."""
 
     def choose_move(self, board: chess.Board) -> chess.Move:
