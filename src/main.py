@@ -1,80 +1,62 @@
+from typing import Optional
+
 import chess
 
-from bot.tabounv1 import tabounV1
-from bot.tabounv2 import tabounV2
+from bot import BOT_REGISTRY
+from game.pgn import load_board_from_user_choice
+from game.runner import run_bot_vs_bot, run_human_vs_bot
 
 
-def prompt_player_move(board: chess.Board) -> chess.Move | None:
-    """Request a move from the user in SAN or UCI until a legal move is given.
-    Type 'abandon' to resign (returns None).
-    """
+def select_bot(prompt: str = "Choisis le bot"):
+    bots = list(BOT_REGISTRY.items())
+    if not bots:
+        raise ValueError("Aucun bot disponible.")
     while True:
-        user_input = input("Votre coup (SAN ou UCI) / 'abandon': ").strip()
-        if not user_input:
-            print("Merci d'entrer un coup.")
-            continue
+        print("Bots disponibles:")
+        for index, (name, _) in enumerate(bots, start=1):
+            print(f"{index}) {name}")
 
-        if user_input.lower() in {"abandon", "resign", "quit", "exit"}: #fonction d'abandon
-            return None
+        choice = input(f"{prompt} (nom ou numero): ").strip().lower()
+        if choice.isdigit():
+            index = int(choice)
+            if 1 <= index <= len(bots):
+                return bots[index - 1][1]()
+        else:
+            for name, bot_class in bots:
+                if choice == name.lower():
+                    return bot_class()
 
-        move = None
-        try:
-            move = board.parse_san(user_input) #essaye d'abord de parser le coup en SAN
-        except ValueError:
-            try:
-                candidate = chess.Move.from_uci(user_input) #essaye ensuite de parser le coup en UCI
-                if candidate in board.legal_moves:
-                    move = candidate
-            except ValueError:
-                move = None
-
-        if move and move in board.legal_moves:
-            return move
-
-        print("Coup invalide. Essayez encore.")
+        print("Choix invalide. Reessaie.")
 
 
-def describe_outcome(board: chess.Board) -> str:
-    outcome = board.outcome() #obtenir le resultat de la partie, si outcome est None la partie n'est pas terminee
-    if not outcome: 
-        return "Partie terminee."
-    if outcome.winner is None:
-        return f"Partie nulle ({outcome.termination.name.lower()})."
-    if outcome.winner:
-        return f"Vous gagnez ({outcome.termination.name.lower()})."
-    return f"Le bot gagne ({outcome.termination.name.lower()})."
+def choose_color() -> bool:
+    choice = input("Tu veux jouer (b)lancs ou (n)oirs ? ").strip().lower()
+    return choice != "n"  # défaut: blancs
 
 
-def select_bot():
+def choose_mode() -> str:
     while True:
-        choice = input("Choisis le bot: 1) tabounV1 (random)  2) tabounV2 (minimax): ").strip()
+        choice = input("Mode: 1) humain vs bot  2) bot vs bot : ").strip()
         if choice == "1":
-            return tabounV1()
+            return "human_vs_bot"
         if choice == "2":
-            return tabounV2()
+            return "bot_vs_bot"
         print("Choix invalide. Tape 1 ou 2.")
 
 
 def main() -> None:
-    board = chess.Board()
-    bot = select_bot()
-    print("Bienvenue ! Vous jouez les blancs contre un bot.\n")
+    board = load_board_from_user_choice()
+    mode = choose_mode()
+    user_is_white: Optional[bool] = None
 
-    while not board.is_game_over():
-        print(board)
-        player_move = prompt_player_move(board) #demande le coup du joueur
-        board.push(player_move)
-
-        if board.is_game_over(): 
-            break
-
-        bot_move = bot.choose_move(board) #le bot choisit son coup
-        bot_move_san = board.san(bot_move) #convertit le coup du bot en SAN pour l'affichage
-        board.push(bot_move)   #le bot joue son coup
-        print(f"Bot joue : {bot_move_san}\n")
-
-    print(board)
-    print(describe_outcome(board))
+    if mode == "human_vs_bot":
+        bot = select_bot()
+        user_is_white = choose_color()
+        run_human_vs_bot(board, bot, user_is_white)
+    else:
+        bot_white = select_bot("Bot pour les blancs")
+        bot_black = select_bot("Bot pour les noirs")
+        run_bot_vs_bot(board, bot_white, bot_black)
 
 
 if __name__ == "__main__":
