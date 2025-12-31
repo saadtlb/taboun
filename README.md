@@ -1,13 +1,14 @@
 # taboun
 
-taboun is a python chess-bot project built on top of `python-chess`.
+taboun is a python chess-bot built on top of `python-chess`.
 
-## Bots
+## bots
 
 | Bot | File | Idea | Notes |
 | --- | --- | --- | --- |
 | `tabounV1` | `src/bot/tabounv1.py` | Random legal move | |
 | `tabounV2` | `src/bot/tabounv2.py` | Minimax + material evaluation | Configurable depth (default `2`) |
+| `tabounV3` | `src/bot/tabounv3.py` | Minimax + simplified evaluation (PST) | Better positional sense than V2 |
 
 ## Requirements
 
@@ -26,9 +27,7 @@ Windows PowerShell:
 pip install python-chess
 ```
 
-## Run (Terminal)
-
-Start the program:
+## cli
 
 ```bash
 python src/main.py
@@ -36,9 +35,9 @@ python src/main.py
 
 You will be prompted for:
 
-- **Start position**: new game, or load from **FEN** or **PGN**
+- **Start position**: new game or load from **FEN** or **PGN**
 - **Mode**: `human vs bot` or `bot vs bot`
-- **Bot(s)**: pick from the available bots (by name or number)
+- **Bot**: pick from the available bots
 - **Color** (human vs bot): play White or Black
 
 During the game:
@@ -51,4 +50,3 @@ At the end:
 
 - The result is printed with the winning bot name + color
 - You can save the game as a **PGN** file
-
