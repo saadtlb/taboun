@@ -12,6 +12,7 @@ taboun is a python chess-bot built on top of `python-chess`.
 | `tabounV4` | `src/bot/tabounv4.py` | Alpha-beta + simplified evaluation | depth `3` |
 | `tabounV5` | `src/bot/tabounv5.py` | Alpha-beta + simplified evaluation + move ordering | Captures then checks then quiet moves |
 | `tabounV6` | `src/bot/tabounv6.py` | Alpha-beta + simplified evaluation + quiescence | Extends capture sequences |
+| `tabounV7` | `src/bot/tabounv7.py` | Alpha-beta + simplified evaluation + quiescence + TT | Uses a transposition table |
 
 ## Requirements
 
