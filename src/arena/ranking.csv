@@ -1,8 +1,8 @@
 bot,points,wins,draws,losses,games
-tabounv6,11.0,11,0,1,12
-tabounv7,11.0,11,0,1,12
-tabounv5,6.0,5,2,5,12
-tabounv4,5.5,4,3,5,12
-tabounv3,5.0,4,2,6,12
-tabounv2,3.0,2,2,8,12
-tabounv1,0.5,0,1,11,12
+tabounv6,110.0,110,0,10,120
+tabounv7,109.5,109,1,10,120
+tabounv5,59.5,49,21,50,120
+tabounv4,58.5,47,23,50,120
+tabounv3,50.0,40,20,60,120
+tabounv2,28.0,16,24,80,120
+tabounv1,4.5,0,9,111,120

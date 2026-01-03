@@ -54,3 +54,15 @@ At the end:
 
 - The result is printed with the winning bot name + color
 - You can save the game as a **PGN** file
+
+## Arena ranking
+
+| Bot | Points | Wins | Draws | Losses | Games |
+| --- | --- | --- | --- | --- | --- |
+| tabounv6 | 110.0 | 110 | 0 | 10 | 120 |
+| tabounv7 | 109.5 | 109 | 1 | 10 | 120 |
+| tabounv5 | 59.5 | 49 | 21 | 50 | 120 |
+| tabounv4 | 58.5 | 47 | 23 | 50 | 120 |
+| tabounv3 | 50.0 | 40 | 20 | 60 | 120 |
+| tabounv2 | 28.0 | 16 | 24 | 80 | 120 |
+| tabounv1 | 4.5 | 0 | 9 | 111 | 120 |
