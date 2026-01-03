@@ -56,6 +56,20 @@ At the end:
 - The result is printed with the winning bot name + color
 - You can save the game as a **PGN** file
 
+## Arena
+
+Run a round-robin between all bots and export CSV files:
+
+```bash
+python -m src.arena.runner
+```
+
+Outputs (inside `arena/`):
+
+- `arena/results.csv` (pair results)
+- `arena/ranking.csv` (overall ranking + Elo)
+- `arena/matrix.csv` (matrix view per pairing)
+
 ## Arena ranking
 
 | Bot | Points | Wins | Draws | Losses | Games |
