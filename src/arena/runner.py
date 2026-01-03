@@ -17,6 +17,8 @@ def run_arena(
     results_rows: List[Dict[str, Any]] = []
     scores = {name: {"points": 0.0, "wins": 0, "draws": 0, "losses": 0, "games": 0} for name, _ in bot_items}
     matrix_scores = {name: {other: "" for other, _ in bot_items} for name, _ in bot_items}
+    elo = {name: 1200.0 for name, _ in bot_items}
+    k_factor = 20.0
 
     for (name_a, class_a), (name_b, class_b) in itertools.combinations(bot_items, 2):
         match_label = f"Match: {name_a} vs {name_b}"
@@ -24,6 +26,7 @@ def run_arena(
         print(f"{timestamp} {match_label}")
         match = play_match(class_a, class_b, games=games_per_pair, match_label=match_label)
         stats = match["stats"]
+        results = match["results"]
 
         # Update scores
         scores[name_a]["points"] += stats["bot_a_points"]
@@ -53,6 +56,16 @@ def run_arena(
         matrix_scores[name_a][name_b] = f"{stats['bot_a_points']:.1f}-{stats['bot_b_points']:.1f}"
         matrix_scores[name_b][name_a] = f"{stats['bot_b_points']:.1f}-{stats['bot_a_points']:.1f}"
 
+        #Update Elo after each game using FIDE formula
+        for white_score, black_score in results:
+            ra = elo[name_a]
+            rb = elo[name_b]
+            expected_a = 1.0 / (1.0 + 10 ** ((rb - ra) / 400.0))
+            expected_b = 1.0 - expected_a
+
+            elo[name_a] = ra + k_factor * (white_score - expected_a)
+            elo[name_b] = rb + k_factor * (black_score - expected_b)
+
     ranking_rows = [
         {
             "bot": name,
@@ -61,6 +74,7 @@ def run_arena(
             "draws": data["draws"],
             "losses": data["losses"],
             "games": data["games"],
+            "elo": round(elo[name], 1),
         }
         for name, data in scores.items()
     ]
