@@ -13,6 +13,7 @@ taboun is a python chess bot built on top of `python-chess`.
 | `tabounV5` | `src/bot/tabounv5.py` | Alpha-beta + simplified evaluation + move ordering | Captures then checks then quiet moves |
 | `tabounV6` | `src/bot/tabounv6.py` | Alpha-beta + simplified evaluation + quiescence | Extends capture sequences |
 | `tabounV7` | `src/bot/tabounv7.py` | Alpha-beta + simplified evaluation + quiescence + TT | Uses a transposition table |
+| `tabounV8` | `src/bot/tabounv8.py` | V7 + advanced move ordering + iterative deepening | Orders captures, promotions, checks, and previous best move |
 
 ## Requirements
 
@@ -64,6 +65,18 @@ Run a round-robin between all bots and export CSV files:
 python -m src.arena.runner
 ```
 
+Run the arena in parallel:
+
+```bash
+python -m src.arena.runner --parallel --workers 4
+```
+
+Useful options:
+
+- `--games-per-pair 20`: number of games for each bot pairing
+- `--parallel`: run different pairings at the same time
+- `--workers 4`: number of parallel worker processes
+
 Outputs (inside `arena/`):
 
 - `arena/results.csv` (pair results)
@@ -71,6 +84,8 @@ Outputs (inside `arena/`):
 - `arena/matrix.csv` (matrix view per pairing)
 
 ## Arena ranking
+
+Current ranking was generated before `tabounV8` was added.
 
 | Bot | Points | Wins | Draws | Losses | Games |
 | --- | --- | --- | --- | --- | --- |

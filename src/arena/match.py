@@ -6,13 +6,15 @@ import chess
 def play_game(bot_white_class, bot_black_class, max_plies: int = 400) -> tuple[float, float]:
     """Plays a single game between two bot classes. Returns (white_score, black_score)."""
     board = chess.Board()
+    bot_white = bot_white_class()
+    bot_black = bot_black_class()
     ply_count = 0
 
     while not board.is_game_over(claim_draw=True) and ply_count < max_plies:
         if board.turn == chess.WHITE:
-            bot = bot_white_class()
+            bot = bot_white
         else:
-            bot = bot_black_class()
+            bot = bot_black
 
         legal_moves = list(board.legal_moves)
         if not legal_moves:
