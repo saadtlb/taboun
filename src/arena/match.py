@@ -49,7 +49,7 @@ def play_match(bot_a_class, bot_b_class, games: int = 20, match_label: str | Non
     for index in range(1, half + 1):
         if match_label:
             timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            print(f"{timestamp} {match_label} - Game {index}/{games}")
+            print(f"{timestamp} {match_label} - Game {index}/{games}", flush=True)
         w, b = play_game(bot_a_class, bot_b_class)
         stats["bot_a_points"] += w
         stats["bot_b_points"] += b
@@ -61,12 +61,13 @@ def play_match(bot_a_class, bot_b_class, games: int = 20, match_label: str | Non
         else:
             stats["draws"] += 1
         results.append((w, b))
+        print_game_finished(match_label, index, games, stats)
 
     # bot B as White, bot A as Black
     for index in range(half + 1, games + 1):
         if match_label:
             timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            print(f"{timestamp} {match_label} - Game {index}/{games}")
+            print(f"{timestamp} {match_label} - Game {index}/{games}", flush=True)
         w, b = play_game(bot_b_class, bot_a_class)
         stats["bot_b_points"] += w
         stats["bot_a_points"] += b
@@ -78,5 +79,19 @@ def play_match(bot_a_class, bot_b_class, games: int = 20, match_label: str | Non
         else:
             stats["draws"] += 1
         results.append((b, w))  # perspective consistent: bot_a as White score first
+        print_game_finished(match_label, index, games, stats)
 
     return {"stats": stats, "results": results}
+
+
+def print_game_finished(match_label: str | None, index: int, games: int, stats: dict) -> None:
+    if not match_label:
+        return
+
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    print(
+        f"{timestamp} {match_label} - Finished game {index}/{games} "
+        f"score {stats['bot_a_points']:.1f}-{stats['bot_b_points']:.1f} "
+        f"(W:{stats['bot_a_wins']}-{stats['bot_b_wins']}, D:{stats['draws']})",
+        flush=True,
+    )

@@ -22,8 +22,9 @@ def run_arena(
     matrix_path: str = "arena/matrix.csv",
     parallel: bool = False,
     workers: int = 4,
+    bot_names: list[str] | None = None,
 ) -> None:
-    bot_items = list(BOT_REGISTRY.items())
+    bot_items = select_bot_items(bot_names)
     results_rows: List[Dict[str, Any]] = []
     scores = {name: {"points": 0.0, "wins": 0, "draws": 0, "losses": 0, "games": 0} for name, _ in bot_items}
     matrix_scores = {name: {other: "" for other, _ in bot_items} for name, _ in bot_items}
@@ -61,6 +62,41 @@ def run_arena(
     write_matrix_csv(matrix_path, bot_names, matrix)
 
 
+def select_bot_items(bot_names: list[str] | None = None) -> list[tuple[str, type]]:
+    if bot_names is None:
+        return list(BOT_REGISTRY.items())
+
+    selected = []
+    missing = []
+    seen = set()
+    duplicates = []
+
+    for raw_name in bot_names:
+        name = raw_name.strip().lower()
+        if not name:
+            continue
+        if name in seen:
+            duplicates.append(raw_name)
+            continue
+        seen.add(name)
+        if name in BOT_REGISTRY:
+            selected.append((name, BOT_REGISTRY[name]))
+        else:
+            missing.append(raw_name)
+
+    if missing:
+        available = ", ".join(BOT_REGISTRY.keys())
+        raise ValueError(f"Unknown bot(s): {', '.join(missing)}. Available bots: {available}")
+
+    if duplicates:
+        raise ValueError(f"Duplicate bot(s): {', '.join(duplicates)}")
+
+    if len(selected) < 2:
+        raise ValueError("Arena needs at least two bots.")
+
+    return selected
+
+
 def build_pairings(bot_items: list[tuple[str, type]]) -> list[dict[str, Any]]:
     pairings = []
 
@@ -82,7 +118,7 @@ def run_pairings_sequential(pairings: list[dict[str, Any]], games_per_pair: int)
     for pairing in pairings:
         match_label = f"Match: {pairing['name_a']} vs {pairing['name_b']}"
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        print(f"{timestamp} {match_label}")
+        print(f"{timestamp} {match_label}", flush=True)
         match_results.append(
             play_pairing(
                 pairing["index"],
@@ -105,7 +141,7 @@ def run_pairings_parallel(
         raise ValueError("workers must be at least 1.")
 
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    print(f"{timestamp} Running arena in parallel with {workers} workers.")
+    print(f"{timestamp} Running arena in parallel with {workers} workers.", flush=True)
 
     match_results = []
     with ProcessPoolExecutor(max_workers=workers) as executor:
@@ -116,7 +152,7 @@ def run_pairings_parallel(
                 pairing["name_a"],
                 pairing["name_b"],
                 games_per_pair,
-                None,
+                f"Match: {pairing['name_a']} vs {pairing['name_b']}",
             ): pairing
             for pairing in pairings
         }
@@ -128,7 +164,8 @@ def run_pairings_parallel(
             timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             print(
                 f"{timestamp} Finished: {pairing['name_a']} vs {pairing['name_b']} "
-                f"({stats['bot_a_points']:.1f}-{stats['bot_b_points']:.1f})"
+                f"({stats['bot_a_points']:.1f}-{stats['bot_b_points']:.1f})",
+                flush=True,
             )
             match_results.append(match_result)
 
@@ -211,6 +248,7 @@ def update_arena_tables(
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run the taboun bot arena.")
     parser.add_argument("--games-per-pair", type=int, default=20)
+    parser.add_argument("--bots", help="Comma-separated bot names, for example: tabounv7,tabounv8")
     parser.add_argument("--parallel", action="store_true")
     parser.add_argument("--workers", type=int, default=4)
     parser.add_argument("--results-path", default="arena/results.csv")
@@ -221,14 +259,24 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> None:
     args = parse_args()
-    run_arena(
-        games_per_pair=args.games_per_pair,
-        results_path=args.results_path,
-        ranking_path=args.ranking_path,
-        matrix_path=args.matrix_path,
-        parallel=args.parallel,
-        workers=args.workers,
-    )
+    try:
+        run_arena(
+            games_per_pair=args.games_per_pair,
+            results_path=args.results_path,
+            ranking_path=args.ranking_path,
+            matrix_path=args.matrix_path,
+            parallel=args.parallel,
+            workers=args.workers,
+            bot_names=parse_bot_names(args.bots),
+        )
+    except ValueError as error:
+        raise SystemExit(f"error: {error}") from error
+
+
+def parse_bot_names(raw_bots: str | None) -> list[str] | None:
+    if raw_bots is None:
+        return None
+    return [name.strip() for name in raw_bots.split(",") if name.strip()]
 
 
 if __name__ == "__main__":
