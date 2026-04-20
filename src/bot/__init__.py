@@ -7,6 +7,7 @@ from bot.tabounv6 import tabounV6
 from bot.tabounv7 import tabounV7
 from bot.tabounv8 import tabounV8
 from bot.tabounv9 import tabounV9
+from bot.tabounv10 import tabounV10
 
 BOT_REGISTRY = {
     "tabounv1": tabounV1,
@@ -18,4 +19,5 @@ BOT_REGISTRY = {
     "tabounv7": tabounV7,
     "tabounv8": tabounV8,
     "tabounv9": tabounV9,
+    "tabounv10": tabounV10,
 }
