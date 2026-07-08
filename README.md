@@ -16,6 +16,17 @@ taboun is a python chess bot built on top of `python-chess`.
 | `tabounV8` | `src/bot/tabounv8.py` | V7 + advanced move ordering + iterative deepening | Orders captures, promotions, checks, and previous best move |
 | `tabounV9` | `src/bot/tabounv9.py` | V8 + improved positional evaluation | Mobility, bishop pair, pawn structure, king safety, development |
 | `tabounV10` | `src/bot/tabounv10.py` | V9 + time management + limited quiescence | Stops by time limit, keeps last completed depth |
+| `tabounV11` | `src/bot/tabounv11.py` | V10 + Komodo Polyglot opening book | Uses `data/openings/books/komodo3.bin`, copied from the Komodo3 book `Book.bin`; falls back to V10 outside the book |
+
+## Opening book
+
+`tabounV11` uses a Polyglot opening book from Komodo:
+
+```text
+data/openings/books/komodo3.bin
+```
+
+At each move, `tabounV11` first asks the Komodo book for a weighted book move. If the current position is not in the book, it uses the normal `tabounV10` search.
 
 ## Requirements
 
