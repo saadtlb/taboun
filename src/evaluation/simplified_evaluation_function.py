@@ -202,20 +202,20 @@ def _pst_value_for_black(square: chess.Square, table_rank8_to1: list[int]) -> in
     return _pst_value_for_white(mirrored, table_rank8_to1)
 
 
-def _index_by_square(table_rank8_to1: list[int]) -> tuple[list[int], list[int]]:
+def index_by_square(table_rank8_to1: list[int]) -> tuple[list[int], list[int]]:
     white = [_pst_value_for_white(square, table_rank8_to1) for square in chess.SQUARES]
     black = [_pst_value_for_black(square, table_rank8_to1) for square in chess.SQUARES]
     return white, black
 
 
 _PST_BY_SQUARE = {
-    chess.PAWN: _index_by_square(PAWN_PST),
-    chess.KNIGHT: _index_by_square(KNIGHT_PST),
-    chess.BISHOP: _index_by_square(BISHOP_PST),
-    chess.ROOK: _index_by_square(ROOK_PST),
-    chess.QUEEN: _index_by_square(QUEEN_PST),
+    chess.PAWN: index_by_square(PAWN_PST),
+    chess.KNIGHT: index_by_square(KNIGHT_PST),
+    chess.BISHOP: index_by_square(BISHOP_PST),
+    chess.ROOK: index_by_square(ROOK_PST),
+    chess.QUEEN: index_by_square(QUEEN_PST),
 }
 
-_KING_MG_BY_SQUARE = _index_by_square(KING_MIDGAME_PST)
-_KING_EG_BY_SQUARE = _index_by_square(KING_ENDGAME_PST)
+_KING_MG_BY_SQUARE = index_by_square(KING_MIDGAME_PST)
+_KING_EG_BY_SQUARE = index_by_square(KING_ENDGAME_PST)
 
