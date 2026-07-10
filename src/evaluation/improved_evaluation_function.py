@@ -1,6 +1,6 @@
 import chess
 
-from evaluation.simplified_evaluation_function import evaluate_simplified, is_endgame
+from evaluation.simplified_evaluation_function import is_endgame, static_score_simplified, terminal_score
 
 
 def evaluate_improved(board: chess.Board) -> int:
@@ -8,10 +8,11 @@ def evaluate_improved(board: chess.Board) -> int:
     Returns an evaluation score from White's perspective.
     Positive score means White is better, negative score means Black is better.
     """
-    if board.outcome(claim_draw=True) is not None:
-        return evaluate_simplified(board)
+    terminal = terminal_score(board)
+    if terminal is not None:
+        return terminal
 
-    score = evaluate_simplified(board)
+    score = static_score_simplified(board)
 
     score += evaluate_mobility(board)
     score += evaluate_bishop_pair(board)
@@ -190,9 +191,17 @@ def undeveloped_piece_penalty(board: chess.Board, color: chess.Color) -> int:
 
 
 def count_legal_moves_for_color(board: chess.Board, color: chess.Color) -> int:
-    board_copy = board.copy(stack=False)
-    board_copy.turn = color
-    return len(list(board_copy.legal_moves))
+    if board.turn == color:
+        return board.legal_moves.count()
+
+    # Flipping the side to move in place avoids copying the board. Move generation
+    # reads only turn, occupancy, castling rights and ep_square, so the count is
+    # the same as on a copy; the original turn is always restored.
+    board.turn = color
+    try:
+        return board.legal_moves.count()
+    finally:
+        board.turn = not color
 
 
 def starting_minor_piece_squares(color: chess.Color) -> list[chess.Square]:

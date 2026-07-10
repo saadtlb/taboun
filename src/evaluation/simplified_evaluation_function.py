@@ -98,32 +98,72 @@ KING_ENDGAME_PST = [
 ]
 
 
+def terminal_score(board: chess.Board) -> int | None:
+    """
+    Score of a finished game from White's perspective, or None if the game goes on.
+
+    Equivalent to inspecting ``board.outcome(claim_draw=True)`` but far cheaper:
+    ``outcome`` unconditionally runs ``can_claim_threefold_repetition()``, which
+    replays the move stack and then pushes every legal move. The two clock guards
+    below skip that work when a claim is arithmetically impossible:
+    - a fifty-move claim needs halfmove_clock >= 99,
+    - a threefold claim needs the position (or one a legal move away) to have
+      occurred twice already, which takes at least 3 reversible plies.
+    Variant conditions are not checked: these bots only ever play standard chess.
+    """
+    if board.is_checkmate():
+        return -MATE_SCORE if board.turn == chess.WHITE else MATE_SCORE
+    if board.is_insufficient_material():
+        return 0
+    if not any(board.generate_legal_moves()):
+        return 0
+    if board.is_seventyfive_moves():
+        return 0
+    if board.is_fivefold_repetition():
+        return 0
+    if board.halfmove_clock >= 99 and board.can_claim_fifty_moves():
+        return 0
+    if board.halfmove_clock >= 3 and board.can_claim_threefold_repetition():
+        return 0
+    return None
+
+
+def static_score_simplified(board: chess.Board) -> int:
+    """Material plus piece-square tables, assuming the game is not over."""
+    score = 0
+
+    for piece_type in (chess.PAWN, chess.KNIGHT, chess.BISHOP, chess.ROOK, chess.QUEEN):
+        value = PIECE_VALUES[piece_type]
+        white_table, black_table = _PST_BY_SQUARE[piece_type]
+        for square in board.pieces(piece_type, chess.WHITE):
+            score += value + white_table[square]
+        for square in board.pieces(piece_type, chess.BLACK):
+            score -= value + black_table[square]
+
+    white_table, black_table = _KING_EG_BY_SQUARE if is_endgame(board) else _KING_MG_BY_SQUARE
+
+    white_king = board.king(chess.WHITE)
+    if white_king is not None:
+        score += white_table[white_king]
+
+    black_king = board.king(chess.BLACK)
+    if black_king is not None:
+        score -= black_table[black_king]
+
+    return score
+
+
 def evaluate_simplified(board: chess.Board) -> int:
     """
     Returns an evaluation score from White's perspective:
     - positive score: White is better
     - negative score: Black is better
     """
-    outcome = board.outcome(claim_draw=True)
-    if outcome is not None:
-        if outcome.winner is None:
-            return 0
-        return MATE_SCORE if outcome.winner == chess.WHITE else -MATE_SCORE
+    terminal = terminal_score(board)
+    if terminal is not None:
+        return terminal
 
-    endgame = is_endgame(board)
-
-    score = 0
-
-    score += _score_piece_type(board, chess.PAWN, PAWN_PST)
-    score += _score_piece_type(board, chess.KNIGHT, KNIGHT_PST)
-    score += _score_piece_type(board, chess.BISHOP, BISHOP_PST)
-    score += _score_piece_type(board, chess.ROOK, ROOK_PST)
-    score += _score_piece_type(board, chess.QUEEN, QUEEN_PST)
-
-    king_table = KING_ENDGAME_PST if endgame else KING_MIDGAME_PST
-    score += _score_king(board, king_table)
-
-    return score
+    return static_score_simplified(board)
 
 
 def is_endgame(board: chess.Board) -> bool:
@@ -150,36 +190,6 @@ def _queen_side_is_light(board: chess.Board, color: chess.Color) -> bool:
     return rooks == 0 and minor_pieces <= 1
 
 
-def _score_piece_type(board: chess.Board, piece_type: chess.PieceType, pst: list[int]) -> int:
-    value = PIECE_VALUES[piece_type]
-    score = 0
-
-    for square in board.pieces(piece_type, chess.WHITE):
-        score += value
-        score += _pst_value_for_white(square, pst)
-
-    for square in board.pieces(piece_type, chess.BLACK):
-        score -= value
-        score -= _pst_value_for_black(square, pst)
-
-    return score
-
-
-def _score_king(board: chess.Board, king_table: list[int]) -> int:
-    score = 0
-
-    white_king_squares = list(board.pieces(chess.KING, chess.WHITE))
-    black_king_squares = list(board.pieces(chess.KING, chess.BLACK))
-
-    if white_king_squares:
-        score += _pst_value_for_white(white_king_squares[0], king_table)
-
-    if black_king_squares:
-        score -= _pst_value_for_black(black_king_squares[0], king_table)
-
-    return score
-
-
 def _pst_value_for_white(square: chess.Square, table_rank8_to1: list[int]) -> int:
     file_index = chess.square_file(square)
     rank_index = chess.square_rank(square)
@@ -190,4 +200,22 @@ def _pst_value_for_white(square: chess.Square, table_rank8_to1: list[int]) -> in
 def _pst_value_for_black(square: chess.Square, table_rank8_to1: list[int]) -> int:
     mirrored = chess.square_mirror(square)
     return _pst_value_for_white(mirrored, table_rank8_to1)
+
+
+def _index_by_square(table_rank8_to1: list[int]) -> tuple[list[int], list[int]]:
+    white = [_pst_value_for_white(square, table_rank8_to1) for square in chess.SQUARES]
+    black = [_pst_value_for_black(square, table_rank8_to1) for square in chess.SQUARES]
+    return white, black
+
+
+_PST_BY_SQUARE = {
+    chess.PAWN: _index_by_square(PAWN_PST),
+    chess.KNIGHT: _index_by_square(KNIGHT_PST),
+    chess.BISHOP: _index_by_square(BISHOP_PST),
+    chess.ROOK: _index_by_square(ROOK_PST),
+    chess.QUEEN: _index_by_square(QUEEN_PST),
+}
+
+_KING_MG_BY_SQUARE = _index_by_square(KING_MIDGAME_PST)
+_KING_EG_BY_SQUARE = _index_by_square(KING_ENDGAME_PST)
 
