@@ -17,6 +17,26 @@ taboun is a python chess bot built on top of `python-chess`.
 | `tabounV9` | `src/bot/tabounv9.py` | V8 + improved positional evaluation | Mobility, bishop pair, pawn structure, king safety, development |
 | `tabounV10` | `src/bot/tabounv10.py` | V9 + time management + limited quiescence | Stops by time limit, keeps last completed depth |
 | `tabounV11` | `src/bot/tabounv11.py` | V10 + Komodo Polyglot opening book | Uses `data/openings/books/komodo3.bin`, copied from the Komodo3 book `Book.bin`; falls back to V10 outside the book |
+| `tabounV12` | `src/bot/tabounv12.py` | V11 + distance-to-mate scoring, TT with best move, cheap ordering | Uses `evaluate_fast`; mate, stalemate and draws are detected in the search |
+
+## Evaluation
+
+| Function | File | Used by | Scores terminal positions |
+| --- | --- | --- | --- |
+| `evaluate_material` | `src/evaluation/material.py` | V2 | yes |
+| `evaluate_simplified` | `src/evaluation/simplified_evaluation_function.py` | V3–V8 | yes |
+| `evaluate_improved` | `src/evaluation/improved_evaluation_function.py` | V9–V11 | yes |
+| `evaluate_fast` | `src/evaluation/fast_evaluation_function.py` | V12 | no, the search does |
+
+The first three return a flat `MATE_SCORE` that does not depend on how far away
+the mate is, so every mating line looks equally good and the bot can shuffle
+instead of mating: `tabounV10` draws KQ vs K against a random opponent. An
+evaluation cannot fix this, because it does not know the search ply.
+`evaluate_fast` therefore scores only live positions, and `tabounV12` scores
+mates in the search as `MATE_VALUE - ply`.
+
+`evaluate_simplified` and `evaluate_improved` were made faster (13x and 3.3x)
+without changing a single score, so V3–V11 still play exactly the same moves.
 
 ## Opening book
 
@@ -111,6 +131,13 @@ Outputs:
 - `src/arena/matrix.csv` (matrix view per pairing)
 
 ## Arena ranking
+
+> **This ranking is not usable yet.** The bots are deterministic and the arena
+> starts every game from the initial position with no randomization, so
+> `--games-per-pair 20` replays the same two games ten times each rather than
+> playing twenty. The table below rests on six distinct games per bot, not 120.
+> Fixing this means varied opening positions played with both colors, one time
+> control for all bots, and an Elo anchored on an external engine.
 
 Current ranking was generated before `tabounV8`, `tabounV9`, and `tabounV10` were added.
 
