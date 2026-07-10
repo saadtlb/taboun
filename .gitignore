@@ -4,5 +4,6 @@ __pycache__/
 *.pyc
 tests/
 tmp*/
+.agents/
 arena/*.csv
 src/arena/*.csv

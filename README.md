@@ -84,6 +84,12 @@ Run the arena in parallel:
 python -m src.arena.runner --parallel --workers 4
 ```
 
+Resume an interrupted arena without replaying completed pairings:
+
+```bash
+python -m src.arena.runner --resume --parallel --workers 4
+```
+
 Run the arena only for selected bots:
 
 ```bash
@@ -96,12 +102,13 @@ Useful options:
 - `--bots tabounv8,tabounv9,tabounv10`: only run the arena for these bots
 - `--parallel`: run different pairings at the same time
 - `--workers 4`: number of parallel worker processes
+- `--resume`: read the existing results CSV, skip completed pairings, complete partial pairings, then rebuild ranking and matrix
 
-Outputs (inside `arena/`):
+Outputs:
 
-- `arena/results.csv` (pair results)
-- `arena/ranking.csv` (overall ranking + Elo)
-- `arena/matrix.csv` (matrix view per pairing)
+- `src/arena/results.csv` (pair results)
+- `src/arena/ranking.csv` (overall ranking + Elo)
+- `src/arena/matrix.csv` (matrix view per pairing)
 
 ## Arena ranking
 
