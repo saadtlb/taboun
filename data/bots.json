@@ -1,0 +1,90 @@
+{
+  "schema_version": 1,
+  "repository_url": "https://github.com/saadtlb/taboun",
+  "bots": [
+    {
+      "id": "tabounv1",
+      "name": "Taboun V1",
+      "summary": "Chooses a random legal move.",
+      "change": "The intentionally simple baseline used as the 1000-point rating anchor.",
+      "source_path": "src/bot/tabounv1.py"
+    },
+    {
+      "id": "tabounv2",
+      "name": "Taboun V2",
+      "summary": "Searches with minimax and evaluates material.",
+      "change": "Introduces forward search and material-aware decisions.",
+      "source_path": "src/bot/tabounv2.py"
+    },
+    {
+      "id": "tabounv3",
+      "name": "Taboun V3",
+      "summary": "Uses minimax with a simplified positional evaluation.",
+      "change": "Adds piece-square knowledge instead of counting material alone.",
+      "source_path": "src/bot/tabounv3.py"
+    },
+    {
+      "id": "tabounv4",
+      "name": "Taboun V4",
+      "summary": "Searches three plies with alpha-beta pruning.",
+      "change": "Prunes irrelevant branches while preserving the V3 evaluation.",
+      "source_path": "src/bot/tabounv4.py"
+    },
+    {
+      "id": "tabounv5",
+      "name": "Taboun V5",
+      "summary": "Orders captures and checks before quiet moves.",
+      "change": "Makes alpha-beta pruning more effective through move ordering.",
+      "source_path": "src/bot/tabounv5.py"
+    },
+    {
+      "id": "tabounv6",
+      "name": "Taboun V6",
+      "summary": "Extends tactical capture sequences with quiescence search.",
+      "change": "Reduces horizon mistakes in volatile positions.",
+      "source_path": "src/bot/tabounv6.py"
+    },
+    {
+      "id": "tabounv7",
+      "name": "Taboun V7",
+      "summary": "Caches repeated positions in a transposition table.",
+      "change": "Avoids recalculating positions already visited by V6.",
+      "source_path": "src/bot/tabounv7.py"
+    },
+    {
+      "id": "tabounv8",
+      "name": "Taboun V8",
+      "summary": "Combines iterative deepening with stronger move ordering.",
+      "change": "Prioritizes promotions, captures, checks and the previous best move.",
+      "source_path": "src/bot/tabounv8.py"
+    },
+    {
+      "id": "tabounv9",
+      "name": "Taboun V9",
+      "summary": "Evaluates mobility, pawn structure, king safety and development.",
+      "change": "Adds a broader positional model to the V8 search.",
+      "source_path": "src/bot/tabounv9.py"
+    },
+    {
+      "id": "tabounv10",
+      "name": "Taboun V10",
+      "summary": "Manages a move deadline and bounds quiescence search.",
+      "change": "Returns the last completed depth instead of overrunning its clock.",
+      "source_path": "src/bot/tabounv10.py"
+    },
+    {
+      "id": "tabounv11",
+      "name": "Taboun V11",
+      "summary": "Uses a Polyglot opening book before the V10 search.",
+      "change": "Adds varied, established opening play; the book is disabled in the arena.",
+      "source_path": "src/bot/tabounv11.py"
+    },
+    {
+      "id": "tabounv12",
+      "name": "Taboun V12",
+      "summary": "Scores mate distance and stores best moves in its search cache.",
+      "change": "Prefers faster mates and improves transposition-table move ordering.",
+      "source_path": "src/bot/tabounv12.py"
+    }
+  ]
+}

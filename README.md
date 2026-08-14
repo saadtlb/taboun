@@ -150,8 +150,24 @@ python3 -m src.arena.run_tournament --fastchess /path/to/fastchess --official
 Use `--run-id ID --resume` to resume an autosaved run. Each run lives below
 `data/arena/runs/ID` with its PGN, logs, fastchess state and a manifest that
 records the code revision, tool versions, hardware and complete command.
-Opening books are disabled for V11 and V12. The initial official time control
-is 60 seconds plus 0.6 seconds per move, with four concurrent games.
+The opening file used by fastchess is copied into that directory, so a run is
+self-contained. Opening books are disabled for V11 and V12. The initial
+official time control is 60 seconds plus 0.6 seconds per move, with four
+concurrent games.
+
+Create the relative Ordo ranking and the website replay bundle after a
+successful run:
+
+```bash
+python3 -m src.arena.ranking ID --ordo /path/to/ordo
+python3 -m src.arena.publish ID
+```
+
+The rating is explicitly relative to this bot pool, with V1 fixed at 1000 as a
+stable origin. `ranking.json` records Ordo's version, exact command and 95%
+simulation margins. Publication validates the PGN and all W/D/L totals before
+atomically changing `data/arena/latest.json`; published runs cannot be resumed
+or overwritten.
 
 ## Legacy Python arena
 

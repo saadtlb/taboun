@@ -11,7 +11,7 @@ import shlex
 import shutil
 import subprocess
 import sys
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, replace
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -244,14 +244,6 @@ def main() -> None:
             raise ValueError("rounds must be at least 1")
         if args.concurrency < 1:
             raise ValueError("concurrency must be at least 1")
-        if not args.openings.is_file():
-            raise FileNotFoundError(f"openings not found: {args.openings}")
-        available_openings = opening_count(args.openings)
-        if available_openings < rounds:
-            raise ValueError(
-                f"opening suite has {available_openings} games but tournament needs {rounds}"
-            )
-
         executable = args.fastchess or (
             Path(found) if (found := shutil.which("fastchess")) is not None else None
         )
@@ -272,12 +264,23 @@ def main() -> None:
         if args.resume:
             if not (run_dir / "fastchess.json").is_file():
                 raise FileNotFoundError(f"resume state not found in {run_dir}")
+            openings_path = run_dir / "openings.pgn"
         elif run_dir.exists():
             raise FileExistsError(f"run already exists: {run_dir}")
+        else:
+            openings_path = args.openings
+
+        if not openings_path.is_file():
+            raise FileNotFoundError(f"openings not found: {openings_path}")
+        available_openings = opening_count(openings_path)
+        if available_openings < rounds:
+            raise ValueError(
+                f"opening suite has {available_openings} games but tournament needs {rounds}"
+            )
 
         config = TournamentConfig(
             bot_names=bot_names,
-            openings_path=args.openings.resolve(),
+            openings_path=openings_path.resolve(),
             rounds=rounds,
             concurrency=args.concurrency,
             time_control=args.tc,
@@ -296,9 +299,18 @@ def main() -> None:
             return
 
         run_dir.mkdir(parents=True, exist_ok=args.resume)
+        if not args.resume:
+            run_openings = run_dir / "openings.pgn"
+            shutil.copy2(args.openings, run_openings)
+            config = replace(config, openings_path=run_openings.resolve())
+            command = build_fastchess_command(
+                executable.resolve(), config, run_dir, resume=False
+            )
         manifest_path = run_dir / "manifest.json"
         if args.resume and manifest_path.is_file():
             manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+            if "publication" in manifest:
+                raise RuntimeError("a published run is immutable and cannot be resumed")
             manifest["status"] = "running"
             manifest["resumed_at"] = datetime.now(timezone.utc).isoformat()
             manifest["command"] = command
