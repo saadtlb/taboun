@@ -7,7 +7,7 @@ taboun is a python chess bot built on top of `python-chess`.
 | Bot | File | Idea | Notes |
 | --- | --- | --- | --- |
 | `tabounV1` | `src/bot/tabounv1.py` | Random legal move | |
-| `tabounV2` | `src/bot/tabounv2.py` | Minimax + material evaluation | Configurable depth (default `2`) |
+| `tabounV2` | `src/bot/tabounv2.py` | Minimax + material evaluation | Configurable depth and optional move budget |
 | `tabounV3` | `src/bot/tabounv3.py` | Minimax + simplified evaluation | Better positional sense than V2 |
 | `tabounV4` | `src/bot/tabounv4.py` | Alpha-beta + simplified evaluation | Depth `3` |
 | `tabounV5` | `src/bot/tabounv5.py` | Alpha-beta + simplified evaluation + move ordering | Captures then checks then quiet moves |
@@ -16,8 +16,8 @@ taboun is a python chess bot built on top of `python-chess`.
 | `tabounV8` | `src/bot/tabounv8.py` | V7 + advanced move ordering + iterative deepening | Orders captures, promotions, checks, and previous best move |
 | `tabounV9` | `src/bot/tabounv9.py` | V8 + improved positional evaluation | Mobility, bishop pair, pawn structure, king safety, development |
 | `tabounV10` | `src/bot/tabounv10.py` | V9 + time management + limited quiescence | Stops by time limit, keeps last completed depth |
-| `tabounV11` | `src/bot/tabounv11.py` | V10 + Komodo Polyglot opening book | Uses `data/openings/books/komodo3.bin`, copied from the Komodo3 book `Book.bin`; falls back to V10 outside the book |
-| `tabounV12` | `src/bot/tabounv12.py` | V11 + distance-to-mate scoring, TT with best move, cheap ordering | Uses `evaluate_fast`; mate, stalemate and draws are detected in the search |
+| `tabounV11` | `src/bot/tabounv11.py` | V10 + Komodo Polyglot opening book | Book can be disabled with `use_book=False` |
+| `tabounV12` | `src/bot/tabounv12.py` | V11 + distance-to-mate scoring, TT with best move, cheap ordering | Book can be disabled with `use_book=False` |
 
 ## Evaluation
 
@@ -47,6 +47,25 @@ data/openings/books/komodo3.bin
 ```
 
 At each move, `tabounV11` first asks the Komodo book for a weighted book move. If the current position is not in the book, it uses the normal `tabounV10` search.
+
+## Move time limits
+
+`tabounV2` through `tabounV9` accept an optional `time_limit` in seconds:
+
+```python
+bot = tabounV7(time_limit=2.0)
+```
+
+The default is `None`, which preserves the historical fixed-depth behavior.
+With a limit, the bot uses iterative deepening up to its historical maximum
+depth and returns the best move from the last completed depth. `tabounV10`
+through `tabounV12` keep their historical one-second default.
+
+The opening books in V11 and V12 can be disabled for fair tournaments:
+
+```python
+bot = tabounV12(use_book=False)
+```
 
 ## Requirements
 

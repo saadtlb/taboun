@@ -1,14 +1,16 @@
 import chess
 import chess.polyglot
 
+from bot.time_control import SearchTimeout, check_time, make_deadline
 from evaluation.simplified_evaluation_function import evaluate_simplified
 
 
 class tabounV8:
     """Alpha-beta bot with quiescence, TT, advanced move ordering, and iterative deepening."""
 
-    def __init__(self, depth: int = 2) -> None:
+    def __init__(self, depth: int = 2, time_limit: float | None = None) -> None:
         self.depth = depth
+        self.time_limit = time_limit
         self.transposition_table: dict[int, tuple[int, int, str]] = {}
 
     def choose_move(self, board: chess.Board) -> chess.Move:
@@ -17,36 +19,55 @@ class tabounV8:
             raise ValueError("No legal moves available.")
 
         best_move = legal_moves[0]
+        deadline = make_deadline(self.time_limit)
 
         for current_depth in range(1, self.depth + 1):
-            is_white_to_play = board.turn == chess.WHITE
-
-            if is_white_to_play:
-                best_score = -float("inf")
-            else:
-                best_score = float("inf")
-
-            alpha = -float("inf")
-            beta = float("inf")
-            current_best_move = best_move
-
-            for move in order_moves(board, best_move):
-                board.push(move)
-                score = alphabeta(board, current_depth - 1, alpha, beta, self.transposition_table)
-                board.pop()
-
-                if is_white_to_play and score > best_score:
-                    best_score = score
-                    current_best_move = move
-                    alpha = max(alpha, best_score)
-                elif not is_white_to_play and score < best_score:
-                    best_score = score
-                    current_best_move = move
-                    beta = min(beta, best_score)
-
-            best_move = current_best_move
+            try:
+                best_move = search_root(
+                    board,
+                    current_depth,
+                    best_move,
+                    deadline,
+                    self.transposition_table,
+                )
+            except SearchTimeout:
+                break
 
         return best_move
+
+
+def search_root(
+    board: chess.Board,
+    depth: int,
+    previous_best_move: chess.Move,
+    deadline: float | None,
+    table: dict[int, tuple[int, int, str]],
+) -> chess.Move:
+    check_time(deadline)
+    is_white_to_play = board.turn == chess.WHITE
+    best_score = -float("inf") if is_white_to_play else float("inf")
+    alpha = -float("inf")
+    beta = float("inf")
+    best_move = previous_best_move
+
+    for move in order_moves(board, previous_best_move):
+        check_time(deadline)
+        board.push(move)
+        try:
+            score = alphabeta(board, depth - 1, alpha, beta, table, deadline)
+        finally:
+            board.pop()
+
+        if is_white_to_play and score > best_score:
+            best_score = score
+            best_move = move
+            alpha = max(alpha, best_score)
+        elif not is_white_to_play and score < best_score:
+            best_score = score
+            best_move = move
+            beta = min(beta, best_score)
+
+    return best_move
 
 
 def alphabeta(
@@ -55,7 +76,9 @@ def alphabeta(
     alpha: float,
     beta: float,
     table: dict[int, tuple[int, int, str]],
+    deadline: float | None = None,
 ) -> int:
+    check_time(deadline)
     alpha_original = alpha
     beta_original = beta
 
@@ -71,18 +94,21 @@ def alphabeta(
                 return stored_score
 
     if depth == 0 or board.is_game_over():
-        return quiescence(board, alpha, beta)
+        return quiescence(board, alpha, beta, deadline)
 
     legal_moves = order_moves(board)
     if not legal_moves:
-        return quiescence(board, alpha, beta)
+        return quiescence(board, alpha, beta, deadline)
 
     if board.turn == chess.WHITE:
         best_score = -float("inf")
         for move in legal_moves:
+            check_time(deadline)
             board.push(move)
-            score = alphabeta(board, depth - 1, alpha, beta, table)
-            board.pop()
+            try:
+                score = alphabeta(board, depth - 1, alpha, beta, table, deadline)
+            finally:
+                board.pop()
             if score > best_score:
                 best_score = score
             alpha = max(alpha, best_score)
@@ -91,9 +117,12 @@ def alphabeta(
     else:
         best_score = float("inf")
         for move in legal_moves:
+            check_time(deadline)
             board.push(move)
-            score = alphabeta(board, depth - 1, alpha, beta, table)
-            board.pop()
+            try:
+                score = alphabeta(board, depth - 1, alpha, beta, table, deadline)
+            finally:
+                board.pop()
             if score < best_score:
                 best_score = score
             beta = min(beta, best_score)
@@ -110,7 +139,13 @@ def alphabeta(
     return best_score
 
 
-def quiescence(board: chess.Board, alpha: float, beta: float) -> int:
+def quiescence(
+    board: chess.Board,
+    alpha: float,
+    beta: float,
+    deadline: float | None = None,
+) -> int:
+    check_time(deadline)
     # Evaluate only "quiet" positions by extending capture sequences.
     stand_pat = evaluate_simplified(board)
 
@@ -124,11 +159,14 @@ def quiescence(board: chess.Board, alpha: float, beta: float) -> int:
         beta = min(beta, stand_pat)
 
     for move in order_moves(board):
+        check_time(deadline)
         if not board.is_capture(move):
             continue
         board.push(move)
-        score = quiescence(board, alpha, beta)
-        board.pop()
+        try:
+            score = quiescence(board, alpha, beta, deadline)
+        finally:
+            board.pop()
 
         if board.turn == chess.WHITE:
             if score > alpha:

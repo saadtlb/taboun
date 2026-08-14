@@ -75,17 +75,20 @@ class tabounV12:
         time_limit: float = 1.0,
         quiescence_depth: int = 6,
         max_table_entries: int = 1 << 20,
+        use_book: bool = True,
     ) -> None:
         self.depth = depth
         self.time_limit = time_limit
         self.quiescence_depth = quiescence_depth
         self.max_table_entries = max_table_entries
+        self.use_book = use_book
         self.transposition_table: dict = {}
 
     def choose_move(self, board: chess.Board) -> chess.Move:
-        book_move = choose_book_move(board)
-        if book_move is not None:
-            return book_move
+        if self.use_book:
+            book_move = choose_book_move(board)
+            if book_move is not None:
+                return book_move
 
         legal_moves = list(board.legal_moves)
         if not legal_moves:
