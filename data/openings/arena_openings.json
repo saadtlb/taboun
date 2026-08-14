@@ -1,0 +1,8 @@
+{
+  "seed": 20260814,
+  "count": 25,
+  "min_plies": 6,
+  "max_plies": 10,
+  "book_sha256": "ce8378858a8ffa4a4dcf4a26c08f728115abaeadb9fc67b282a452a8bacff8bb",
+  "pgn_sha256": "cc0860774428acd5d16db07a26b85fed110c01c0cefe3d9daeeae6e801cd145d"
+}

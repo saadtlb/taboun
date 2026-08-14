@@ -80,6 +80,11 @@ The adapter understands game clocks (`wtime`, `btime`, increments and
 `movestogo`), fixed `movetime`, `depth`, `stop`, FEN positions and move
 histories. It exposes the standard `OwnBook` option for V11 and V12.
 
+Because the historical bot API returns only a move, UCI `info score` is a
+documented **static evaluation after that move**, using the evaluation family
+of the selected bot. It exists for protocol tooling and must not be used for
+score-based game adjudication.
+
 ## Requirements
 
 - `python-chess`
@@ -122,7 +127,37 @@ At the end:
 - The result is printed with the winning bot name + color
 - You can save the game as a **PGN** file
 
-## Arena
+## Professional arena
+
+Generate the deterministic 25-opening suite:
+
+```bash
+python3 -m src.arena.build_openings
+```
+
+Run a 10-opening pilot with fastchess (20 mirrored games per pairing):
+
+```bash
+python3 -m src.arena.run_tournament --fastchess /path/to/fastchess
+```
+
+Run the official 25-opening tournament (50 games per pairing):
+
+```bash
+python3 -m src.arena.run_tournament --fastchess /path/to/fastchess --official
+```
+
+Use `--run-id ID --resume` to resume an autosaved run. Each run lives below
+`data/arena/runs/ID` with its PGN, logs, fastchess state and a manifest that
+records the code revision, tool versions, hardware and complete command.
+Opening books are disabled for V11 and V12. The initial official time control
+is 60 seconds plus 0.6 seconds per move, with four concurrent games.
+
+## Legacy Python arena
+
+The original in-process arena remains temporarily available for historical
+comparison. Its repeated start positions, unequal thinking time and sequential
+rating updates mean that it must not be used for published rankings.
 
 Run a round-robin between all bots and export CSV files:
 

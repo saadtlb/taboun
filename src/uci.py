@@ -23,6 +23,7 @@ if str(SRC_DIR) not in sys.path:
     sys.path.insert(0, str(SRC_DIR))
 
 from bot import BOT_REGISTRY  # noqa: E402
+from uci_score import score_after_move  # noqa: E402
 
 
 MOVE_OVERHEAD_MS = 25
@@ -222,7 +223,8 @@ class UciEngine:
         elapsed_ms = int((time.perf_counter() - started) * 1000)
         if search_number != self.search_number:
             return
-        self.send(f"info time {elapsed_ms}")
+        score_kind, score_value = score_after_move(self.bot_name, board, best_move)
+        self.send(f"info score {score_kind} {score_value} time {elapsed_ms}")
         self.send(f"bestmove {best_move.uci()}")
 
     def stop(self) -> None:
