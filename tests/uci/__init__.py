@@ -1,0 +1,1 @@
+"""UCI adapter tests."""

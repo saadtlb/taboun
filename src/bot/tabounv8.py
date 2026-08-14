@@ -1,16 +1,24 @@
+from threading import Event
+
 import chess
 import chess.polyglot
 
-from bot.time_control import SearchTimeout, check_time, make_deadline
+from bot.time_control import SearchDeadline, SearchTimeout, check_time, make_deadline
 from evaluation.simplified_evaluation_function import evaluate_simplified
 
 
 class tabounV8:
     """Alpha-beta bot with quiescence, TT, advanced move ordering, and iterative deepening."""
 
-    def __init__(self, depth: int = 2, time_limit: float | None = None) -> None:
+    def __init__(
+        self,
+        depth: int = 2,
+        time_limit: float | None = None,
+        stop_event: Event | None = None,
+    ) -> None:
         self.depth = depth
         self.time_limit = time_limit
+        self.stop_event = stop_event
         self.transposition_table: dict[int, tuple[int, int, str]] = {}
 
     def choose_move(self, board: chess.Board) -> chess.Move:
@@ -19,7 +27,7 @@ class tabounV8:
             raise ValueError("No legal moves available.")
 
         best_move = legal_moves[0]
-        deadline = make_deadline(self.time_limit)
+        deadline = make_deadline(self.time_limit, self.stop_event)
 
         for current_depth in range(1, self.depth + 1):
             try:
@@ -40,7 +48,7 @@ def search_root(
     board: chess.Board,
     depth: int,
     previous_best_move: chess.Move,
-    deadline: float | None,
+    deadline: SearchDeadline | None,
     table: dict[int, tuple[int, int, str]],
 ) -> chess.Move:
     check_time(deadline)
@@ -76,7 +84,7 @@ def alphabeta(
     alpha: float,
     beta: float,
     table: dict[int, tuple[int, int, str]],
-    deadline: float | None = None,
+    deadline: SearchDeadline | None = None,
 ) -> int:
     check_time(deadline)
     alpha_original = alpha
@@ -143,7 +151,7 @@ def quiescence(
     board: chess.Board,
     alpha: float,
     beta: float,
-    deadline: float | None = None,
+    deadline: SearchDeadline | None = None,
 ) -> int:
     check_time(deadline)
     # Evaluate only "quiet" positions by extending capture sequences.

@@ -1,22 +1,26 @@
-import time
+from threading import Event
 
 import chess
 import chess.polyglot
 
+from bot.time_control import SearchDeadline, SearchTimeout, check_time, make_deadline
 from evaluation.improved_evaluation_function import evaluate_improved
-
-
-class SearchTimeout(Exception):
-    pass
 
 
 class tabounV10:
     """V9 with time management and a limited quiescence search."""
 
-    def __init__(self, depth: int = 4, time_limit: float = 1.0, quiescence_depth: int = 4) -> None:
+    def __init__(
+        self,
+        depth: int = 4,
+        time_limit: float = 1.0,
+        quiescence_depth: int = 4,
+        stop_event: Event | None = None,
+    ) -> None:
         self.depth = depth
         self.time_limit = time_limit
         self.quiescence_depth = quiescence_depth
+        self.stop_event = stop_event
         self.transposition_table: dict[int, tuple[int, int, str]] = {}
 
     def choose_move(self, board: chess.Board) -> chess.Move:
@@ -25,7 +29,8 @@ class tabounV10:
             raise ValueError("No legal moves available.")
 
         best_move = legal_moves[0]
-        deadline = time.perf_counter() + self.time_limit
+        deadline = make_deadline(self.time_limit, self.stop_event)
+        assert deadline is not None
 
         for current_depth in range(1, self.depth + 1):
             try:
@@ -47,7 +52,7 @@ def search_root(
     board: chess.Board,
     depth: int,
     previous_best_move: chess.Move,
-    deadline: float,
+    deadline: SearchDeadline,
     quiescence_depth: int,
     table: dict[int, tuple[int, int, str]],
 ) -> chess.Move:
@@ -90,7 +95,7 @@ def alphabeta(
     alpha: float,
     beta: float,
     table: dict[int, tuple[int, int, str]],
-    deadline: float,
+    deadline: SearchDeadline,
     quiescence_depth: int,
 ) -> int:
     check_time(deadline)
@@ -159,7 +164,7 @@ def quiescence(
     board: chess.Board,
     alpha: float,
     beta: float,
-    deadline: float,
+    deadline: SearchDeadline,
     max_depth: int,
     current_depth: int,
 ) -> int:
@@ -200,11 +205,6 @@ def quiescence(
                 break
 
     return alpha if board.turn == chess.WHITE else beta
-
-
-def check_time(deadline: float) -> None:
-    if time.perf_counter() >= deadline:
-        raise SearchTimeout()
 
 
 def order_moves(board: chess.Board, best_move: chess.Move | None = None) -> list[chess.Move]:

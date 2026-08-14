@@ -1,15 +1,23 @@
+from threading import Event
+
 import chess
 
-from bot.time_control import SearchTimeout, check_time, make_deadline
+from bot.time_control import SearchDeadline, SearchTimeout, check_time, make_deadline
 from evaluation.material import evaluate_material
 
 
 class tabounV2:
     """Bot that selects a move using a simple minimax search."""
 
-    def __init__(self, depth: int = 2, time_limit: float | None = None) -> None:
+    def __init__(
+        self,
+        depth: int = 2,
+        time_limit: float | None = None,
+        stop_event: Event | None = None,
+    ) -> None:
         self.depth = depth #profondeur
         self.time_limit = time_limit
+        self.stop_event = stop_event
 
     def choose_move(self, board: chess.Board) -> chess.Move:
         legal_moves = list(board.legal_moves) #tous les coups possibles
@@ -17,7 +25,7 @@ class tabounV2:
             raise ValueError("No legal moves available.")
 
         best_move = legal_moves[0] #coup par défaut
-        deadline = make_deadline(self.time_limit)
+        deadline = make_deadline(self.time_limit, self.stop_event)
 
         if deadline is None:
             return search_root(board, self.depth, best_move, None)
@@ -35,7 +43,7 @@ def search_root(
     board: chess.Board,
     depth: int,
     previous_best_move: chess.Move,
-    deadline: float | None,
+    deadline: SearchDeadline | None,
 ) -> chess.Move:
     check_time(deadline)
     is_white_to_play = board.turn == chess.WHITE #true si c'est aux Blancs
@@ -60,7 +68,7 @@ def search_root(
     return best_move
 
 
-def minimax(board: chess.Board, depth: int, deadline: float | None = None) -> int:
+def minimax(board: chess.Board, depth: int, deadline: SearchDeadline | None = None) -> int:
     check_time(deadline)
     if depth == 0 or board.is_game_over():  # condition d'arrêt soit profondeur 0 soit fin de partie
         return evaluate_material(board)

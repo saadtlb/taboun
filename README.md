@@ -67,6 +67,19 @@ The opening books in V11 and V12 can be disabled for fair tournaments:
 bot = tabounV12(use_book=False)
 ```
 
+## UCI
+
+Every bot can run as a UCI engine for tournament managers and chess GUIs:
+
+```bash
+python3 src/uci.py tabounv12
+python3 src/uci.py tabounv12 --no-book
+```
+
+The adapter understands game clocks (`wtime`, `btime`, increments and
+`movestogo`), fixed `movetime`, `depth`, `stop`, FEN positions and move
+histories. It exposes the standard `OwnBook` option for V11 and V12.
+
 ## Requirements
 
 - `python-chess`

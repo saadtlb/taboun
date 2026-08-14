@@ -11,10 +11,11 @@ Differences with tabounV11:
   then discarding the quiet ones.
 """
 
-import time
+from threading import Event
 
 import chess
 
+from bot.time_control import SearchDeadline, SearchTimeout, check_time, make_deadline
 from evaluation.fast_evaluation_function import evaluate_fast
 from opening.book import choose_book_move
 
@@ -44,12 +45,8 @@ CAPTURE_BASE = 800_000
 NODES_PER_TIME_CHECK = 1024
 
 
-class SearchTimeout(Exception):
-    pass
-
-
 class SearchContext:
-    def __init__(self, deadline: float, table: dict, max_table_entries: int) -> None:
+    def __init__(self, deadline: SearchDeadline, table: dict, max_table_entries: int) -> None:
         self.deadline = deadline
         self.table = table
         self.max_table_entries = max_table_entries
@@ -57,8 +54,8 @@ class SearchContext:
 
     def count_node(self) -> None:
         self.nodes += 1
-        if self.nodes % NODES_PER_TIME_CHECK == 0 and time.perf_counter() >= self.deadline:
-            raise SearchTimeout()
+        if self.nodes % NODES_PER_TIME_CHECK == 0:
+            check_time(self.deadline)
 
     def store(self, key, depth: int, score: int, flag: int, move: chess.Move | None, ply: int) -> None:
         if len(self.table) >= self.max_table_entries:
@@ -76,12 +73,14 @@ class tabounV12:
         quiescence_depth: int = 6,
         max_table_entries: int = 1 << 20,
         use_book: bool = True,
+        stop_event: Event | None = None,
     ) -> None:
         self.depth = depth
         self.time_limit = time_limit
         self.quiescence_depth = quiescence_depth
         self.max_table_entries = max_table_entries
         self.use_book = use_book
+        self.stop_event = stop_event
         self.transposition_table: dict = {}
 
     def choose_move(self, board: chess.Board) -> chess.Move:
@@ -94,7 +93,8 @@ class tabounV12:
         if not legal_moves:
             raise ValueError("No legal moves available.")
 
-        deadline = time.perf_counter() + self.time_limit
+        deadline = make_deadline(self.time_limit, self.stop_event)
+        assert deadline is not None
         context = SearchContext(deadline, self.transposition_table, self.max_table_entries)
         best_move = legal_moves[0]
 

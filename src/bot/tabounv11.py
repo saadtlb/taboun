@@ -1,3 +1,5 @@
+from threading import Event
+
 import chess
 
 from bot.tabounv10 import tabounV10
@@ -13,8 +15,14 @@ class tabounV11(tabounV10):
         time_limit: float = 1.0,
         quiescence_depth: int = 4,
         use_book: bool = True,
+        stop_event: Event | None = None,
     ) -> None:
-        super().__init__(depth=depth, time_limit=time_limit, quiescence_depth=quiescence_depth)
+        super().__init__(
+            depth=depth,
+            time_limit=time_limit,
+            quiescence_depth=quiescence_depth,
+            stop_event=stop_event,
+        )
         self.use_book = use_book
 
     def choose_move(self, board: chess.Board) -> chess.Move:
