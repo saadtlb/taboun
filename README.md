@@ -169,6 +169,19 @@ simulation margins. Publication validates the PGN and all W/D/L totals before
 atomically changing `data/arena/latest.json`; published runs cannot be resumed
 or overwritten.
 
+For a future V13, run a bounded SPRT against the previous accepted version
+before spending time on a complete round robin:
+
+```bash
+python3 -m src.arena.run_sprt tabounv13 tabounv12 \
+  --fastchess /path/to/fastchess --python /path/to/venv/bin/python
+```
+
+The default normalized-Elo hypotheses are H0 = 0 and H1 = +5, with
+alpha = beta = 0.05 and a hard limit of 500 mirrored opening pairs. The
+manifest records the exact hypotheses, command, result and fastchess state.
+An H1 acceptance still requires the official round robin before publication.
+
 ## Legacy Python arena
 
 The original in-process arena remains temporarily available for historical
