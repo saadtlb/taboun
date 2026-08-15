@@ -9,3 +9,5 @@ src/arena/*.csv
 data/arena/runs/*
 !data/arena/runs/.gitkeep
 data/arena/latest.json
+data/arena/runner-state.json
+data/arena/runner-logs/
