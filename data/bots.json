@@ -85,6 +85,13 @@
       "summary": "Scores mate distance and stores best moves in its search cache.",
       "change": "Prefers faster mates and improves transposition-table move ordering.",
       "source_path": "src/bot/tabounv12.py"
+    },
+    {
+      "id": "tabounv13",
+      "name": "Taboun V13",
+      "summary": "Runs V12's search on PeSTO's tapered piece-square tables.",
+      "change": "Replaces the hand-written evaluation by two tuned tables per piece, blended by game phase. Cheaper leaves, deeper search.",
+      "source_path": "src/bot/tabounv13.py"
     }
   ]
 }

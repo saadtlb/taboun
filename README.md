@@ -1,6 +1,6 @@
 # taboun
 
-taboun is a Python chess bot laboratory built on `python-chess`: twelve bot
+taboun is a Python chess bot laboratory built on `python-chess`: thirteen bot
 versions with one idea each, a UCI adapter, and a reproducible fastchess arena
 whose published results feed the public showcase on geheim.land.
 
@@ -12,7 +12,7 @@ taboun/
 ├── data/
 │   ├── bots.json               # editorial card of each bot version, shown on the site
 │   ├── openings/
-│   │   ├── books/komodo3.bin   # Polyglot book used by V11/V12 and by the opening builder
+│   │   ├── books/komodo3.bin   # Polyglot book used by V11 to V13 and by the opening builder
 │   │   ├── arena_openings.pgn  # deterministic 25-opening suite played in tournaments
 │   │   └── arena_openings.json # seed, count and SHA-256 of that suite
 │   └── arena/
@@ -28,6 +28,7 @@ taboun/
 └── tests/
     ├── bots/                   # historical moves, time limits, opening book switch
     ├── uci/                    # protocol parsing, clock allocation, subprocess sessions
+    ├── evaluation/             # PeSTO tables, phase and symmetry
     └── arena/                  # openings, tournament command, ranking, publication, SPRT
 ```
 
@@ -51,6 +52,7 @@ root with `python -m`. Generated files only live under `data/arena/`.
 | `tabounV10` | `src/bot/tabounv10.py` | V9 + time management + limited quiescence | Stops by time limit, keeps last completed depth |
 | `tabounV11` | `src/bot/tabounv11.py` | V10 + Komodo Polyglot opening book | Book can be disabled with `use_book=False` |
 | `tabounV12` | `src/bot/tabounv12.py` | V11 + distance-to-mate scoring, TT with best move, cheap ordering | Book can be disabled with `use_book=False` |
+| `tabounV13` | `src/bot/tabounv13.py` | V12 search + PeSTO tapered evaluation | Two tuned tables per piece blended by game phase |
 
 ## Evaluation
 
@@ -60,6 +62,7 @@ root with `python -m`. Generated files only live under `data/arena/`.
 | `evaluate_simplified` | `src/evaluation/simplified_evaluation_function.py` | V3–V8 | yes |
 | `evaluate_improved` | `src/evaluation/improved_evaluation_function.py` | V9–V11 | yes |
 | `evaluate_fast` | `src/evaluation/fast_evaluation_function.py` | V12 | no, the search does |
+| `evaluate_pesto` | `src/evaluation/pesto_evaluation_function.py` | V13 | no, the search does |
 
 The first three return a flat `MATE_SCORE` that does not depend on how far away
 the mate is, so every mating line looks equally good and the bot can shuffle
@@ -70,6 +73,11 @@ mates in the search as `MATE_VALUE - ply`.
 
 `evaluate_simplified` and `evaluate_improved` were made faster (13x and 3.3x)
 without changing a single score, so V3–V11 still play exactly the same moves.
+
+`evaluate_pesto` drops every hand-written term. It is PeSTO, the evaluation of
+the engine RofChade: two piece-square tables per piece, one for the middlegame
+and one for the endgame, tuned automatically and blended by a game phase
+computed from the remaining material. V13 runs V12's search on it.
 
 ## Opening book
 
@@ -92,9 +100,9 @@ bot = tabounV7(time_limit=2.0)
 The default is `None`, which preserves the historical fixed-depth behavior.
 With a limit, the bot uses iterative deepening up to its historical maximum
 depth and returns the best move from the last completed depth. `tabounV10`
-through `tabounV12` keep their historical one-second default.
+through `tabounV13` keep their historical one-second default.
 
-The opening books in V11 and V12 can be disabled for fair tournaments:
+The opening books in V11 to V13 can be disabled for fair tournaments:
 
 ```python
 bot = tabounV12(use_book=False)
@@ -115,7 +123,7 @@ protocol and clock logic, `src/uci/score.py` the static score telemetry.
 
 The adapter understands game clocks (`wtime`, `btime`, increments and
 `movestogo`), fixed `movetime`, `depth`, `stop`, FEN positions and move
-histories. It exposes the standard `OwnBook` option for V11 and V12.
+histories. It exposes the standard `OwnBook` option for V11 to V13.
 
 Because the historical bot API returns only a move, UCI `info score` is a
 documented **static evaluation after that move**, using the evaluation family
@@ -207,7 +215,7 @@ Use `--run-id ID --resume` to resume an autosaved run. Each run lives below
 `data/arena/runs/ID` with its PGN, logs, fastchess state and a manifest that
 records the code revision, tool versions, hardware and complete command.
 The opening file used by fastchess is copied into that directory, so a run is
-self-contained. Opening books are disabled for V11 and V12. The initial
+self-contained. Opening books are disabled for V11 to V13. The initial
 official time control is 60 seconds plus 0.6 seconds per move, with four
 concurrent games.
 

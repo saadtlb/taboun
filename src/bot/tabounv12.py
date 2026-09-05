@@ -49,10 +49,17 @@ NODES_PER_TIME_CHECK = 32
 
 
 class SearchContext:
-    def __init__(self, deadline: SearchDeadline, table: dict, max_table_entries: int) -> None:
+    def __init__(
+        self,
+        deadline: SearchDeadline,
+        table: dict,
+        max_table_entries: int,
+        evaluate=evaluate_fast,
+    ) -> None:
         self.deadline = deadline
         self.table = table
         self.max_table_entries = max_table_entries
+        self.evaluate = evaluate
         self.nodes = 0
 
     def count_node(self) -> None:
@@ -68,6 +75,10 @@ class SearchContext:
 
 class tabounV12:
     """V11 plus distance-to-mate scoring, a move-storing TT, and cheaper ordering."""
+
+    # The static evaluation used at quiescence leaves. Later versions keep this
+    # search and swap the evaluation: tabounV13 plugs PeSTO in here.
+    evaluate = staticmethod(evaluate_fast)
 
     def __init__(
         self,
@@ -98,7 +109,9 @@ class tabounV12:
 
         deadline = make_deadline(self.time_limit, self.stop_event)
         assert deadline is not None
-        context = SearchContext(deadline, self.transposition_table, self.max_table_entries)
+        context = SearchContext(
+            deadline, self.transposition_table, self.max_table_entries, self.evaluate
+        )
         best_move = legal_moves[0]
 
         for current_depth in range(1, self.depth + 1):
@@ -224,7 +237,7 @@ def quiescence(
     if board.is_check() and not any(board.generate_legal_moves()):
         return terminal_score(board, ply)
 
-    stand_pat = evaluate_fast(board)
+    stand_pat = context.evaluate(board)
     if remaining_depth <= 0:
         return stand_pat
 

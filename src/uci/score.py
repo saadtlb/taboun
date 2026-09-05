@@ -12,6 +12,7 @@ import chess
 from src.evaluation.fast_evaluation_function import evaluate_fast
 from src.evaluation.improved_evaluation_function import evaluate_improved
 from src.evaluation.material import evaluate_material
+from src.evaluation.pesto_evaluation_function import evaluate_pesto
 from src.evaluation.simplified_evaluation_function import evaluate_simplified
 
 
@@ -26,7 +27,9 @@ def evaluation_for_bot(bot_name: str):
         return evaluate_simplified
     if version <= 11:
         return evaluate_improved
-    return evaluate_fast
+    if version <= 12:
+        return evaluate_fast
+    return evaluate_pesto
 
 
 def score_after_move(
