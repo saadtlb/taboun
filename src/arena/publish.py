@@ -138,12 +138,25 @@ def validate_ranking(ranking: dict, index: dict, participants: set[str]) -> None
     if ranking.get("total_games") != index["total_games"]:
         raise ValueError("ranking and PGN game totals differ")
     rows = ranking.get("rows")
-    if not isinstance(rows, list) or {row.get("bot") for row in rows} != participants:
+    unrated = ranking.get("unrated", [])
+    if not isinstance(rows, list) or not isinstance(unrated, list):
+        raise ValueError("ranking rows are malformed")
+    rated_bots = {row.get("bot") for row in rows}
+    unrated_bots = {entry.get("bot") for entry in unrated}
+    if rated_bots & unrated_bots:
+        raise ValueError("a bot cannot be both rated and unrated")
+    if rated_bots | unrated_bots != participants:
         raise ValueError("ranking and PGN participants differ")
     for row in rows:
         played = row.get("wins", 0) + row.get("draws", 0) + row.get("losses", 0)
         if row.get("played") != played:
             raise ValueError(f"inconsistent W/D/L totals for {row.get('bot')}")
+    for entry in unrated:
+        # Unrated means no point at all: every game of that bot is a loss.
+        if entry.get("wins", 0) or entry.get("draws", 0) or entry.get("points", 0.0):
+            raise ValueError(f"unrated bot {entry.get('bot')} scored points")
+        if entry.get("played") != entry.get("losses", 0):
+            raise ValueError(f"inconsistent totals for unrated bot {entry.get('bot')}")
 
 
 def publish_run(run_id: str, data_root: Path, bots_path: Path) -> dict:

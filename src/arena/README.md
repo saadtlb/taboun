@@ -22,8 +22,12 @@ with the repository as working directory.
   internal books disabled.
 - A tournament refuses to start from a dirty worktree, because the manifest
   records the commit that played.
-- Ratings are relative to this pool: `tabounv1` is fixed at 1000 as the
+- Ratings are relative to this pool: `tabounv2` is fixed at 1000 as the
   origin, and the 95% margins from Ordo's simulations are published with them.
+  `--anchor` changes the origin; the choice is recorded in `ranking.json`.
+- A bot without a single point has an undefined rating. `ranking.py` lists it
+  under `unrated`, removes its games from the fit, and repeats until every
+  rated bot has scored. `tabounv1` ends up there at real time controls.
 - No adjudication by score: the UCI `info score` is a static evaluation, not
   a search result.
 - A published run is immutable. Rerun under a new ID instead of editing.

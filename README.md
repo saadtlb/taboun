@@ -175,7 +175,10 @@ The arena is the only source of published rankings. Its rules:
    hardware are stored in every run manifest. A tournament refuses to start
    from a dirty worktree.
 4. **Honest Elo.** Ratings are relative to this pool with their 95% margins;
-   V1 fixed at 1000 is an origin convention, not an absolute Elo.
+   V2 fixed at 1000 is an origin convention, not an absolute Elo. A bot that
+   scores no point in a run, which is what the random V1 does at real time
+   controls, cannot be placed on the scale: it is listed as unrated and its
+   games do not count for the other ratings.
 5. **Publication decoupled from computation.** Replaying a published game runs
    no bot. The website only reads immutable artefacts.
 6. **No score adjudication** while the bots do not report a real search score.
@@ -227,7 +230,7 @@ overwritten.
 data/arena/latest.json          # schema_version, run_id, published_at
 data/arena/runs/<run-id>/
 ├── manifest.json               # settings, commit, tools, hardware, command, checksums
-├── ranking.json                # rating list for the site, with margins and CFS
+├── ranking.json                # rating list for the site, with margins, CFS and unrated bots
 ├── ranking.csv                 # same list for humans and spreadsheets
 ├── bots.json                   # copy of data/bots.json at publication time
 ├── games.pgn                   # canonical complete PGN

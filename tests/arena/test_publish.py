@@ -5,7 +5,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from src.arena.publish import publish_run, sha256_file
+from src.arena.publish import publish_run, sha256_file, validate_ranking
 
 
 PGN = '''[Event "Castling"]
@@ -100,6 +100,29 @@ class PublishTests(unittest.TestCase):
             )
             with self.assertRaisesRegex(ValueError, "immutable"):
                 publish_run("test-run", root, bots_path)
+
+    def test_validate_ranking_accepts_unrated_bots(self) -> None:
+        index = {"total_games": 3}
+        participants = {"tabounv1", "tabounv2", "tabounv3"}
+        rows = [
+            {"bot": "tabounv2", "played": 2, "wins": 1, "draws": 1, "losses": 0},
+            {"bot": "tabounv3", "played": 2, "wins": 0, "draws": 1, "losses": 1},
+        ]
+        unrated = [
+            {"bot": "tabounv1", "points": 0.0, "played": 2, "wins": 0, "draws": 0, "losses": 2}
+        ]
+        ranking = {"schema_version": 1, "total_games": 3, "rows": rows, "unrated": unrated}
+
+        validate_ranking(ranking, index, participants)
+
+        with self.assertRaisesRegex(ValueError, "scored points"):
+            scored = {**ranking, "unrated": [{**unrated[0], "draws": 1}]}
+            validate_ranking(scored, index, participants)
+        with self.assertRaisesRegex(ValueError, "participants differ"):
+            validate_ranking(ranking, index, {"tabounv2", "tabounv3"})
+        with self.assertRaisesRegex(ValueError, "both rated and unrated"):
+            twice = {**ranking, "unrated": [{**unrated[0], "bot": "tabounv2"}]}
+            validate_ranking(twice, index, participants)
 
     def test_latest_is_not_written_when_validation_fails(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

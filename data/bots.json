@@ -6,14 +6,14 @@
       "id": "tabounv1",
       "name": "Taboun V1",
       "summary": "Chooses a random legal move.",
-      "change": "The intentionally simple baseline used as the 1000-point rating anchor.",
+      "change": "The intentionally simple baseline. It scores no point at real time controls, so it is listed unrated instead of anchoring the scale.",
       "source_path": "src/bot/tabounv1.py"
     },
     {
       "id": "tabounv2",
       "name": "Taboun V2",
       "summary": "Searches with minimax and evaluates material.",
-      "change": "Introduces forward search and material-aware decisions.",
+      "change": "Introduces forward search and material-aware decisions. Fixed at 1000 as the origin of the relative rating scale.",
       "source_path": "src/bot/tabounv2.py"
     },
     {
