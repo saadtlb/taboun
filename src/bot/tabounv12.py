@@ -41,8 +41,11 @@ TT_MOVE_SCORE = 1_000_000
 PROMOTION_BASE = 900_000
 CAPTURE_BASE = 800_000
 
-# perf_counter() costs more than a node, so the clock is only read periodically.
-NODES_PER_TIME_CHECK = 1024
+# The clock is read every few nodes rather than at every node. 32 nodes take
+# about 1 ms in CPython, so the search stops within 1 ms of its deadline. The
+# historical value of 1024 made V12 overshoot every budget by about 30 ms,
+# which lost games on time in bullet tournaments.
+NODES_PER_TIME_CHECK = 32
 
 
 class SearchContext:
