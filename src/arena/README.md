@@ -5,11 +5,29 @@ Each file has one job:
 - `build_openings.py` creates a deterministic paired-opening suite from the
   Polyglot book.
 - `run_tournament.py` launches or resumes fastchess and records the exact run
-  conditions.
-- `ranking.py` calculates a relative rating list from a completed PGN.
+  conditions in `manifest.json`.
+- `ranking.py` calculates a relative rating list from a completed PGN with
+  Ordo.
 - `publish.py` validates a run and builds the read-only bundle consumed by the
   website.
 - `run_sprt.py` runs a bounded candidate-versus-baseline acceptance test.
+- `legacy/` holds the original in-process arena, frozen.
+
+Everything runs from the repository root with `python -m src.arena.<module>`.
+Each engine is started by fastchess as `python -m src.uci <bot> --no-book`
+with the repository as working directory.
+
+## Principles
+
+- Same clock for every bot, one thread per engine, mirrored opening pairs,
+  internal books disabled.
+- A tournament refuses to start from a dirty worktree, because the manifest
+  records the commit that played.
+- Ratings are relative to this pool: `tabounv1` is fixed at 1000 as the
+  origin, and the 95% margins from Ordo's simulations are published with them.
+- No adjudication by score: the UCI `info score` is a static evaluation, not
+  a search result.
+- A published run is immutable. Rerun under a new ID instead of editing.
 
 ## Complete workflow
 
@@ -29,15 +47,29 @@ python3 -m src.arena.ranking 2026-08-14-pilot --ordo ~/.local/bin/ordo
 python3 -m src.arena.publish 2026-08-14-pilot
 ```
 
-Ordo fixes `tabounv1` at 1000 to define the origin of this pool. These numbers
-are relative ratings, not universal Elo values. The 95% margins come from
-Ordo's simulations; the exact command and tool version are stored in
-`ranking.json`.
-
 Publication validates every PGN move and every W/D/L total, creates the
-per-game JSON files, then atomically updates `data/arena/latest.json`. A
-published run is immutable: rerun the tournament under a new ID instead of
-editing its results.
+per-game JSON files, then atomically updates `data/arena/latest.json`.
+
+## Published bundle
+
+```text
+data/arena/latest.json          # schema_version, run_id, published_at
+data/arena/runs/<run-id>/
+├── manifest.json               # settings, commit, tools, hardware, command, checksums
+├── ranking.json                # rating list for the site, with margins and CFS
+├── ranking.csv                 # same list for humans and spreadsheets
+├── bots.json                   # copy of data/bots.json at publication time
+├── games.pgn                   # canonical complete PGN
+├── games/
+│   ├── index.json              # id, colours, result, opening, termination
+│   └── game-000001.json        # UCI/SAN moves and headers for the replay
+└── openings.pgn                # the opening suite actually played
+```
+
+The website reads exactly this layout (`geheim-land/apps/taboun_chess_bot/arena`).
+Any schema change is made here first, tested on a temporary bundle, then
+supported on the site before the next run is published. `manifest.json`
+carries `schema_version` for that purpose.
 
 ## Future bot acceptance
 

@@ -67,7 +67,7 @@ def current_commit() -> str:
 
 def dirty_paths() -> list[str]:
     lines = git_output("status", "--porcelain").splitlines()
-    return [line for line in lines if line and line[3:] != "PLAN.md"]
+    return [line for line in lines if line]
 
 
 def fastchess_version(executable: Path) -> str:

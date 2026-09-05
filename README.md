@@ -1,8 +1,43 @@
 # taboun
 
-taboun is a python chess bot built on top of `python-chess`.
+taboun is a Python chess bot laboratory built on `python-chess`: twelve bot
+versions with one idea each, a UCI adapter, and a reproducible fastchess arena
+whose published results feed the public showcase on geheim.land.
 
-## bots
+## Layout
+
+```text
+taboun/
+├── README.md
+├── data/
+│   ├── bots.json               # editorial card of each bot version, shown on the site
+│   ├── openings/
+│   │   ├── books/komodo3.bin   # Polyglot book used by V11/V12 and by the opening builder
+│   │   ├── arena_openings.pgn  # deterministic 25-opening suite played in tournaments
+│   │   └── arena_openings.json # seed, count and SHA-256 of that suite
+│   └── arena/
+│       ├── runs/<run-id>/      # one immutable folder per tournament (not in git)
+│       ├── latest.json         # pointer to the last validated run (not in git)
+│       └── legacy/             # CSV outputs of the historical Python arena
+├── src/
+│   ├── bot/                    # one file per bot version, plus time_control.py
+│   ├── evaluation/             # the four evaluation functions
+│   ├── opening/                # Polyglot book lookup
+│   ├── uci/                    # UCI engine: engine.py, score.py, __main__.py
+│   ├── arena/                  # fastchess pipeline, see src/arena/README.md
+│   │   └── legacy/             # historical in-process arena, frozen
+│   └── game/  ui/  main.py     # terminal game against a bot
+└── tests/
+    ├── bots/                   # historical moves, time limits, opening book switch
+    ├── uci/                    # protocol parsing, clock allocation, subprocess sessions
+    └── arena/                  # openings, tournament command, ranking, publication, SPRT
+```
+
+Every module is imported through the `src` package, for example
+`from src.bot import BOT_REGISTRY`, and every command runs from the repository
+root with `python -m`. Generated files only live under `data/arena/`.
+
+## Bots
 
 | Bot | File | Idea | Notes |
 | --- | --- | --- | --- |
@@ -91,22 +126,20 @@ score-based game adjudication.
 
 ## Requirements
 
+- Python 3.10 or newer
 - `python-chess`
-
-Install dependencies :
 
 ```bash
 python -m venv venv
-```
-
-Windows PowerShell:
-
-```powershell
-venv\Scripts\Activate.ps1
+source venv/bin/activate        # Windows PowerShell: venv\Scripts\Activate.ps1
 pip install python-chess
+python -m unittest              # or: python -m pytest
 ```
 
-## cli
+Tournaments additionally need the `fastchess` and `ordo` binaries; their
+paths are passed on the command line.
+
+## Terminal game
 
 ```bash
 python -m src.main
@@ -131,7 +164,25 @@ At the end:
 - The result is printed with the winning bot name + color
 - You can save the game as a **PGN** file
 
-## Professional arena
+## Arena
+
+The arena is the only source of published rankings. Its rules:
+
+1. **Historical behaviour preserved.** Without arguments every bot plays as it
+   always did; a time budget bounds a search, it never deepens it beyond the
+   bot's historical maximum depth.
+2. **Same computing opportunity.** Same clock for everyone, one thread per
+   engine, mirrored opening pairs, internal books disabled.
+3. **Reproducible.** Seed, tool versions, Git commit, exact command and
+   hardware are stored in every run manifest. A tournament refuses to start
+   from a dirty worktree.
+4. **Honest Elo.** Ratings are relative to this pool with their 95% margins;
+   V1 fixed at 1000 is an origin convention, not an absolute Elo.
+5. **Publication decoupled from computation.** Replaying a published game runs
+   no bot. The website only reads immutable artefacts.
+6. **No score adjudication** while the bots do not report a real search score.
+
+### Workflow
 
 Generate the deterministic 25-opening suite:
 
@@ -167,11 +218,31 @@ python3 -m src.arena.ranking ID --ordo /path/to/ordo
 python3 -m src.arena.publish ID
 ```
 
-The rating is explicitly relative to this bot pool, with V1 fixed at 1000 as a
-stable origin. `ranking.json` records Ordo's version, exact command and 95%
-simulation margins. Publication validates the PGN and all W/D/L totals before
-atomically changing `data/arena/latest.json`; published runs cannot be resumed
-or overwritten.
+`ranking.json` records Ordo's version, exact command and 95% simulation
+margins. Publication validates the PGN and all W/D/L totals before atomically
+changing `data/arena/latest.json`; published runs cannot be resumed or
+overwritten.
+
+### Published bundle
+
+```text
+data/arena/latest.json          # schema_version, run_id, published_at
+data/arena/runs/<run-id>/
+├── manifest.json               # settings, commit, tools, hardware, command, checksums
+├── ranking.json                # rating list for the site, with margins and CFS
+├── ranking.csv                 # same list for humans and spreadsheets
+├── bots.json                   # copy of data/bots.json at publication time
+├── games.pgn                   # canonical complete PGN
+├── games/
+│   ├── index.json              # id, colours, result, opening, termination
+│   └── game-000001.json        # UCI/SAN moves and headers for the replay
+└── openings.pgn                # the opening suite actually played
+```
+
+Runs that were not published, such as SPRT matches, keep their folder but
+have no `publication` key in the manifest and are ignored by the site.
+
+### Accepting a new version
 
 For a future V13, run a bounded SPRT against the previous accepted version
 before spending time on a complete round robin:
@@ -185,6 +256,31 @@ The default normalized-Elo hypotheses are H0 = 0 and H1 = +5, with
 alpha = beta = 0.05 and a hard limit of 500 mirrored opening pairs. The
 manifest records the exact hypotheses, command, result and fastchess state.
 An H1 acceptance still requires the official round robin before publication.
+
+## Website
+
+The public showcase lives in the sibling repository `geheim-land`, app
+`apps/taboun_chess_bot`. taboun stays a standalone provider: a CLI and files.
+Three containers touch this repository:
+
+| Container | Sees | Role |
+| --- | --- | --- |
+| `web` | `data/arena`, read-only | Arena page, replay, PostgreSQL archive of published runs |
+| `chess-engine` | the repository, read-only | interactive Play page, bots with a 2 s budget |
+| `arena-runner` | repository read-only, `data/arena` writable | runs `python -m src.arena.run_tournament`, then `ranking` and `publish`, on request from the Arena page |
+
+Adding a bot:
+
+1. write `src/bot/tabounv13.py`;
+2. register it in `src/bot/__init__.py`;
+3. add its card to `data/bots.json`;
+4. run the SPRT above against the previous version;
+5. commit. The worktree must be clean: the tournament records the commit it
+   plays and refuses a dirty tree.
+
+The launch panel on the site lists the new bot immediately, because the
+runner reads `BOT_REGISTRY` at each request. Only the Play page needs
+`docker compose restart chess-engine` in `geheim-land`.
 
 ## Legacy Python arena
 
