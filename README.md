@@ -184,65 +184,12 @@ An H1 acceptance still requires the official round robin before publication.
 
 ## Legacy Python arena
 
-The original in-process arena remains temporarily available for historical
-comparison. Its repeated start positions, unequal thinking time and sequential
-rating updates mean that it must not be used for published rankings.
-
-Run a round-robin between all bots and export CSV files:
-
-```bash
-python -m src.arena.runner
-```
-
-Run the arena in parallel:
+The original in-process arena is kept frozen under `src/arena/legacy/` for
+historical reference. It has no tests and must not be used for published
+rankings: every game starts from the initial position, bots do not share a
+clock, and ratings are updated sequentially. Its historical CSV outputs live
+in `data/arena/legacy/`.
 
 ```bash
-python -m src.arena.runner --parallel --workers 4
+python -m src.arena.legacy.runner --help
 ```
-
-Resume an interrupted arena without replaying completed pairings:
-
-```bash
-python -m src.arena.runner --resume --parallel --workers 4
-```
-
-Run the arena only for selected bots:
-
-```bash
-python -m src.arena.runner --bots tabounv8,tabounv9,tabounv10 --parallel --workers 4 --games-per-pair 4
-```
-
-Useful options:
-
-- `--games-per-pair 20`: number of games for each bot pairing
-- `--bots tabounv8,tabounv9,tabounv10`: only run the arena for these bots
-- `--parallel`: run different pairings at the same time
-- `--workers 4`: number of parallel worker processes
-- `--resume`: read the existing results CSV, skip completed pairings, complete partial pairings, then rebuild ranking and matrix
-
-Outputs:
-
-- `src/arena/results.csv` (pair results)
-- `src/arena/ranking.csv` (overall ranking + Elo)
-- `src/arena/matrix.csv` (matrix view per pairing)
-
-## Arena ranking
-
-> **This ranking is not usable yet.** The bots are deterministic and the arena
-> starts every game from the initial position with no randomization, so
-> `--games-per-pair 20` replays the same two games ten times each rather than
-> playing twenty. The table below rests on six distinct games per bot, not 120.
-> Fixing this means varied opening positions played with both colors, one time
-> control for all bots, and an Elo anchored on an external engine.
-
-Current ranking was generated before `tabounV8`, `tabounV9`, and `tabounV10` were added.
-
-| Bot | Points | Wins | Draws | Losses | Games |
-| --- | --- | --- | --- | --- | --- |
-| tabounv6 | 110.0 | 110 | 0 | 10 | 120 |
-| tabounv7 | 109.5 | 109 | 1 | 10 | 120 |
-| tabounv5 | 59.5 | 49 | 21 | 50 | 120 |
-| tabounv4 | 58.5 | 47 | 23 | 50 | 120 |
-| tabounv3 | 50.0 | 40 | 20 | 60 | 120 |
-| tabounv2 | 28.0 | 16 | 24 | 80 | 120 |
-| tabounv1 | 4.5 | 0 | 9 | 111 | 120 |

@@ -1,3 +1,11 @@
+"""Legacy in-process arena.
+
+Frozen historical code: repeated start positions, unequal thinking time and
+sequential rating updates make its results unusable for published rankings.
+The fastchess pipeline in ``src/arena`` replaced it. Run from the repository
+root with ``python -m src.arena.legacy.runner``.
+"""
+
 import argparse
 import csv
 import sys
@@ -7,20 +15,20 @@ from pathlib import Path
 from datetime import datetime
 from typing import Any
 
-SRC_DIR = Path(__file__).resolve().parents[1]
+SRC_DIR = Path(__file__).resolve().parents[2]
 if str(SRC_DIR) not in sys.path:
     sys.path.insert(0, str(SRC_DIR))
 
-from bot import BOT_REGISTRY
-from arena.match import play_match
-from arena.export import write_results_csv, write_ranking_csv, write_matrix_csv
+from bot import BOT_REGISTRY  # noqa: E402
+from arena.legacy.match import play_match  # noqa: E402
+from arena.legacy.export import write_results_csv, write_ranking_csv, write_matrix_csv  # noqa: E402
 
 
 def run_arena(
     games_per_pair: int = 20,
-    results_path: str = "src/arena/results.csv",
-    ranking_path: str = "src/arena/ranking.csv",
-    matrix_path: str = "src/arena/matrix.csv",
+    results_path: str = "data/arena/legacy/results.csv",
+    ranking_path: str = "data/arena/legacy/ranking.csv",
+    matrix_path: str = "data/arena/legacy/matrix.csv",
     parallel: bool = False,
     workers: int = 4,
     bot_names: list[str] | None = None,
@@ -465,9 +473,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--bots", help="Comma-separated bot names, for example: tabounv7,tabounv8")
     parser.add_argument("--parallel", action="store_true")
     parser.add_argument("--workers", type=int, default=4)
-    parser.add_argument("--results-path", default="src/arena/results.csv")
-    parser.add_argument("--ranking-path", default="src/arena/ranking.csv")
-    parser.add_argument("--matrix-path", default="src/arena/matrix.csv")
+    parser.add_argument("--results-path", default="data/arena/legacy/results.csv")
+    parser.add_argument("--ranking-path", default="data/arena/legacy/ranking.csv")
+    parser.add_argument("--matrix-path", default="data/arena/legacy/matrix.csv")
     parser.add_argument("--resume", action="store_true", help="Reuse existing results and play only missing games.")
     return parser.parse_args()
 

@@ -4,8 +4,6 @@ __pycache__/
 *.pyc
 tmp*/
 .agents/
-arena/*.csv
-src/arena/*.csv
 data/arena/runs/*
 !data/arena/runs/.gitkeep
 data/arena/latest.json

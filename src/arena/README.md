@@ -54,5 +54,8 @@ alpha = beta = 0.05, up to 500 opening pairs (1000 games). The bound prevents
 an undecided test from running forever. Accepting H1 is evidence of a gain in
 these conditions, not permission to skip the full round-robin publication.
 
-The historical `runner.py` remains available as a legacy runner until the
-first fastchess tournament has been published end to end.
+## Legacy folder
+
+`legacy/` holds the original in-process arena (`runner.py`, `match.py`,
+`export.py`). It is frozen and untested; its CSV outputs are archived under
+`data/arena/legacy/`. Nothing in the fastchess pipeline imports it.
