@@ -31,8 +31,8 @@ class SprtCommandTests(unittest.TestCase):
                 resume=False,
             )
         self.assertEqual(command.count("-engine"), 2)
-        self.assertIn("args=src/uci.py tabounv12 --no-book", command)
-        self.assertIn("args=src/uci.py tabounv11 --no-book", command)
+        self.assertIn("args=-m src.uci tabounv12 --no-book", command)
+        self.assertIn("args=-m src.uci tabounv11 --no-book", command)
         self.assertIn("tc=60+0.6", command)
         self.assertIn("-repeat", command)
         self.assertIn("-sprt", command)

@@ -1,31 +1,24 @@
-"""Small UCI adapter for every bot in :mod:`bot`.
+"""UCI engine for every bot in :mod:`src.bot`.
 
 The adapter owns protocol parsing and clock allocation. Bots keep their simple
-``choose_move(board)`` API and only receive a per-move budget.
+``choose_move(board)`` API and only receive a per-move budget. The command
+line entry point lives in ``src/uci/__main__.py`` and the static ``info score``
+telemetry in ``src/uci/score.py``.
 """
 
 from __future__ import annotations
 
-import argparse
 import inspect
 import sys
 import threading
 import time
 from dataclasses import dataclass
-from pathlib import Path
 from typing import TextIO
 
 import chess
 
-
-# Temporary: lets ``python src/uci.py`` import the ``src`` package until the
-# adapter becomes ``python -m src.uci``.
-REPO_ROOT = Path(__file__).resolve().parents[1]
-if str(REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(REPO_ROOT))
-
-from src.bot import BOT_REGISTRY  # noqa: E402
-from src.uci_score import score_after_move  # noqa: E402
+from src.bot import BOT_REGISTRY
+from src.uci.score import score_after_move
 
 
 MOVE_OVERHEAD_MS = 25
@@ -294,19 +287,3 @@ def run_loop(engine: UciEngine, input_stream: TextIO = sys.stdin) -> None:
     for line in input_stream:
         if not engine.handle(line):
             break
-
-
-def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Run a Taboun bot as a UCI engine.")
-    parser.add_argument("bot", choices=BOT_REGISTRY, help="Bot version to run.")
-    parser.add_argument("--no-book", action="store_true", help="Disable the V11/V12 opening book.")
-    return parser.parse_args()
-
-
-def main() -> None:
-    args = parse_args()
-    run_loop(UciEngine(args.bot, own_book=not args.no_book))
-
-
-if __name__ == "__main__":
-    main()

@@ -10,7 +10,7 @@ from pathlib import Path
 
 import chess
 
-from src.uci import GoCommand, UciEngine, allocate_time, parse_go, parse_position
+from src.uci.engine import GoCommand, UciEngine, allocate_time, parse_go, parse_position
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -58,7 +58,7 @@ class InProcessProtocolTests(unittest.TestCase):
 class SubprocessProtocolTests(unittest.TestCase):
     def start_engine(self, bot: str) -> subprocess.Popen[str]:
         process = subprocess.Popen(
-            [sys.executable, "src/uci.py", bot, "--no-book"],
+            [sys.executable, "-m", "src.uci", bot, "--no-book"],
             cwd=REPO_ROOT,
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,

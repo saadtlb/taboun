@@ -4,7 +4,7 @@ import unittest
 
 import chess
 
-from src.uci_score import score_after_move
+from src.uci.score import score_after_move
 
 
 class StaticScoreTests(unittest.TestCase):

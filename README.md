@@ -72,9 +72,13 @@ bot = tabounV12(use_book=False)
 Every bot can run as a UCI engine for tournament managers and chess GUIs:
 
 ```bash
-python3 src/uci.py tabounv12
-python3 src/uci.py tabounv12 --no-book
+python3 -m src.uci tabounv12
+python3 -m src.uci tabounv12 --no-book
 ```
+
+Run it from the repository root. fastchess starts the same command with its
+`dir=` option pointing at the repository. `src/uci/engine.py` holds the
+protocol and clock logic, `src/uci/score.py` the static score telemetry.
 
 The adapter understands game clocks (`wtime`, `btime`, increments and
 `movestogo`), fixed `movetime`, `depth`, `stop`, FEN positions and move

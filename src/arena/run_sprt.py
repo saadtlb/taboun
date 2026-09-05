@@ -59,7 +59,7 @@ def build_sprt_command(
                 "-engine",
                 f"cmd={python}",
                 f"name={bot_name}",
-                f"args=src/uci.py {bot_name} --no-book",
+                f"args=-m src.uci {bot_name} --no-book",
                 f"dir={REPO_ROOT}",
                 "proto=uci",
                 "restart=off",

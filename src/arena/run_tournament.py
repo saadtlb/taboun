@@ -117,7 +117,7 @@ def build_fastchess_command(
                 "-engine",
                 f"cmd={config.python_executable}",
                 f"name={bot_name}",
-                f"args=src/uci.py {bot_name} --no-book",
+                f"args=-m src.uci {bot_name} --no-book",
                 f"dir={REPO_ROOT}",
                 "proto=uci",
                 "restart=off",
