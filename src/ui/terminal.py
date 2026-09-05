@@ -4,18 +4,19 @@ import chess
 
 
 def prompt_player_move(board: chess.Board) -> chess.Move | None:
-    """Request a move from the user in SAN or UCI until a legal move is given.
-    Type 'abandon' to resign (returns None).
+    """Ask for a move in SAN or UCI until a legal one is given.
+
+    Typing ``resign`` (or ``quit``, ``exit``) and confirming returns None.
     """
     while True:
-        user_input = input("Votre coup (SAN ou UCI) / 'abandon': ").strip()
+        user_input = input("Your move (SAN or UCI), or resign > ").strip()
         if not user_input:
-            print("Merci d'entrer un coup.")
+            print("Please enter a move.")
             continue
 
-        if user_input.lower() in {"abandon", "resign", "quit", "exit"}:
-            confirm = input("Confirmer l'abandon ? (o/n): ").strip().lower()
-            if confirm == "o":
+        if user_input.lower() in {"resign", "quit", "exit"}:
+            confirm = input("Confirm resignation? (y/n) > ").strip().lower()
+            if confirm == "y":
                 return None
             continue
 
@@ -33,12 +34,12 @@ def prompt_player_move(board: chess.Board) -> chess.Move | None:
         if move and move in board.legal_moves:
             return move
 
-        print("Coup invalide. Essayez encore.")
+        print("Illegal move. Try again.")
 
 
 def format_san_history(start_board: chess.Board, moves: List[chess.Move]) -> str:
     if not moves:
-        return "(aucun coup)"
+        return "(no moves yet)"
     board = start_board.copy(stack=False)
     tokens: List[str] = []
     for move in moves:

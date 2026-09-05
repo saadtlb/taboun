@@ -12,11 +12,11 @@ MATE_SCORE = 10000000
 
 
 def evaluate_material(board: chess.Board) -> int:
-    outcome = board.outcome(claim_draw=True) #regarde si la partie est terminée
-    if outcome is not None: #si la partie est terminée
+    outcome = board.outcome(claim_draw=True)  # is the game over?
+    if outcome is not None:
         if outcome.winner is None:
-            return 0 #match nul
-        return MATE_SCORE if outcome.winner == chess.WHITE else -MATE_SCORE #victoire blanche ou noire
+            return 0  # draw
+        return MATE_SCORE if outcome.winner == chess.WHITE else -MATE_SCORE  # White or Black wins
 
     white_score = 0
     black_score = 0
