@@ -11,7 +11,6 @@ Each file has one job:
 - `publish.py` validates a run and builds the read-only bundle consumed by the
   website.
 - `run_sprt.py` runs a bounded candidate-versus-baseline acceptance test.
-- `legacy/` holds the original in-process arena, frozen.
 
 Everything runs from the repository root with `python -m src.arena.<module>`.
 Each engine is started by fastchess as `python -m src.uci <bot> --no-book`
@@ -85,9 +84,3 @@ The defaults test normalized Elo hypotheses H0 = 0 and H1 = +5 with
 alpha = beta = 0.05, up to 500 opening pairs (1000 games). The bound prevents
 an undecided test from running forever. Accepting H1 is evidence of a gain in
 these conditions, not permission to skip the full round-robin publication.
-
-## Legacy folder
-
-`legacy/` holds the original in-process arena (`runner.py`, `match.py`,
-`export.py`). It is frozen and untested; its CSV outputs are archived under
-`data/arena/legacy/`. Nothing in the fastchess pipeline imports it.

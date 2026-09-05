@@ -17,15 +17,13 @@ taboun/
 │   │   └── arena_openings.json # seed, count and SHA-256 of that suite
 │   └── arena/
 │       ├── runs/<run-id>/      # one immutable folder per tournament (not in git)
-│       ├── latest.json         # pointer to the last validated run (not in git)
-│       └── legacy/             # CSV outputs of the historical Python arena
+│       └── latest.json         # pointer to the last validated run (not in git)
 ├── src/
 │   ├── bot/                    # one file per bot version, plus time_control.py
 │   ├── evaluation/             # the four evaluation functions
 │   ├── opening/                # Polyglot book lookup
 │   ├── uci/                    # UCI engine: engine.py, score.py, __main__.py
 │   ├── arena/                  # fastchess pipeline, see src/arena/README.md
-│   │   └── legacy/             # historical in-process arena, frozen
 │   └── game/  ui/  main.py     # terminal game against a bot
 └── tests/
     ├── bots/                   # historical moves, time limits, opening book switch
@@ -281,15 +279,3 @@ Adding a bot:
 The launch panel on the site lists the new bot immediately, because the
 runner reads `BOT_REGISTRY` at each request. Only the Play page needs
 `docker compose restart chess-engine` in `geheim-land`.
-
-## Legacy Python arena
-
-The original in-process arena is kept frozen under `src/arena/legacy/` for
-historical reference. It has no tests and must not be used for published
-rankings: every game starts from the initial position, bots do not share a
-clock, and ratings are updated sequentially. Its historical CSV outputs live
-in `data/arena/legacy/`.
-
-```bash
-python -m src.arena.legacy.runner --help
-```
