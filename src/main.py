@@ -2,9 +2,9 @@ from typing import Optional
 
 import chess
 
-from bot import BOT_REGISTRY
-from game.pgn import load_board_from_user_choice
-from game.runner import run_bot_vs_bot, run_human_vs_bot
+from src.bot import BOT_REGISTRY
+from src.game.pgn import load_board_from_user_choice
+from src.game.runner import run_bot_vs_bot, run_human_vs_bot
 
 
 def select_bot(prompt: str = "Choisis le bot"):

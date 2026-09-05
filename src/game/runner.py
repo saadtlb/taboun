@@ -2,8 +2,8 @@ from typing import List
 
 import chess
 
-from game.pgn import save_pgn_from_moves
-from ui.terminal import prompt_player_move, format_san_history
+from src.game.pgn import save_pgn_from_moves
+from src.ui.terminal import prompt_player_move, format_san_history
 
 
 def run_human_vs_bot(

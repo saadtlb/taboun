@@ -18,12 +18,14 @@ from typing import TextIO
 import chess
 
 
-SRC_DIR = Path(__file__).resolve().parent
-if str(SRC_DIR) not in sys.path:
-    sys.path.insert(0, str(SRC_DIR))
+# Temporary: lets ``python src/uci.py`` import the ``src`` package until the
+# adapter becomes ``python -m src.uci``.
+REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
 
-from bot import BOT_REGISTRY  # noqa: E402
-from uci_score import score_after_move  # noqa: E402
+from src.bot import BOT_REGISTRY  # noqa: E402
+from src.uci_score import score_after_move  # noqa: E402
 
 
 MOVE_OVERHEAD_MS = 25

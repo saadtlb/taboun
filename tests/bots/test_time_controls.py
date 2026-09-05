@@ -6,9 +6,9 @@ from unittest.mock import patch
 
 import chess
 
-from bot import BOT_REGISTRY
-from bot.tabounv11 import tabounV11
-from bot.tabounv12 import tabounV12
+from src.bot import BOT_REGISTRY
+from src.bot.tabounv11 import tabounV11
+from src.bot.tabounv12 import tabounV12
 
 
 POSITIONS = {
@@ -95,22 +95,22 @@ class TimedSearchTests(unittest.TestCase):
 
 class OpeningBookOptionTests(unittest.TestCase):
     def test_v11_can_disable_book(self) -> None:
-        with patch("bot.tabounv11.choose_book_move") as choose_book_move:
+        with patch("src.bot.tabounv11.choose_book_move") as choose_book_move:
             move = tabounV11(depth=1, time_limit=0.05, use_book=False).choose_move(chess.Board())
         self.assertIn(move, chess.Board().legal_moves)
         choose_book_move.assert_not_called()
 
     def test_v12_can_disable_book(self) -> None:
-        with patch("bot.tabounv12.choose_book_move") as choose_book_move:
+        with patch("src.bot.tabounv12.choose_book_move") as choose_book_move:
             move = tabounV12(depth=1, time_limit=0.05, use_book=False).choose_move(chess.Board())
         self.assertIn(move, chess.Board().legal_moves)
         choose_book_move.assert_not_called()
 
     def test_book_remains_enabled_by_default(self) -> None:
         book_move = chess.Move.from_uci("e2e4")
-        with patch("bot.tabounv11.choose_book_move", return_value=book_move) as v11_book:
+        with patch("src.bot.tabounv11.choose_book_move", return_value=book_move) as v11_book:
             self.assertEqual(tabounV11().choose_move(chess.Board()), book_move)
-        with patch("bot.tabounv12.choose_book_move", return_value=book_move) as v12_book:
+        with patch("src.bot.tabounv12.choose_book_move", return_value=book_move) as v12_book:
             self.assertEqual(tabounV12().choose_move(chess.Board()), book_move)
         v11_book.assert_called_once()
         v12_book.assert_called_once()

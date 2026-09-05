@@ -1,6 +1,6 @@
 import chess
 
-from evaluation.simplified_evaluation_function import is_endgame, static_score_simplified, terminal_score
+from src.evaluation.simplified_evaluation_function import is_endgame, static_score_simplified, terminal_score
 
 
 def evaluate_improved(board: chess.Board) -> int:

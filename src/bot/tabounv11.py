@@ -2,8 +2,8 @@ from threading import Event
 
 import chess
 
-from bot.tabounv10 import tabounV10
-from opening.book import choose_book_move
+from src.bot.tabounv10 import tabounV10
+from src.opening.book import choose_book_move
 
 
 class tabounV11(tabounV10):

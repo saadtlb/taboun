@@ -3,8 +3,8 @@ from threading import Event
 import chess
 import chess.polyglot
 
-from bot.time_control import SearchDeadline, SearchTimeout, check_time, make_deadline
-from evaluation.improved_evaluation_function import evaluate_improved
+from src.bot.time_control import SearchDeadline, SearchTimeout, check_time, make_deadline
+from src.evaluation.improved_evaluation_function import evaluate_improved
 
 
 class tabounV9:

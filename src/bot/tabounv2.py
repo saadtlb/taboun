@@ -2,8 +2,8 @@ from threading import Event
 
 import chess
 
-from bot.time_control import SearchDeadline, SearchTimeout, check_time, make_deadline
-from evaluation.material import evaluate_material
+from src.bot.time_control import SearchDeadline, SearchTimeout, check_time, make_deadline
+from src.evaluation.material import evaluate_material
 
 
 class tabounV2:

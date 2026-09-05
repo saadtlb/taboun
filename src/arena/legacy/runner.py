@@ -8,20 +8,15 @@ root with ``python -m src.arena.legacy.runner``.
 
 import argparse
 import csv
-import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
 import itertools
 from pathlib import Path
 from datetime import datetime
 from typing import Any
 
-SRC_DIR = Path(__file__).resolve().parents[2]
-if str(SRC_DIR) not in sys.path:
-    sys.path.insert(0, str(SRC_DIR))
-
-from bot import BOT_REGISTRY  # noqa: E402
-from arena.legacy.match import play_match  # noqa: E402
-from arena.legacy.export import write_results_csv, write_ranking_csv, write_matrix_csv  # noqa: E402
+from src.bot import BOT_REGISTRY
+from src.arena.legacy.match import play_match
+from src.arena.legacy.export import write_results_csv, write_ranking_csv, write_matrix_csv
 
 
 def run_arena(

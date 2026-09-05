@@ -18,11 +18,7 @@ from pathlib import Path
 import chess.pgn
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-SRC_DIR = REPO_ROOT / "src"
-if str(SRC_DIR) not in sys.path:
-    sys.path.insert(0, str(SRC_DIR))
-
-from bot import BOT_REGISTRY  # noqa: E402
+from src.bot import BOT_REGISTRY
 
 
 DEFAULT_OPENINGS = REPO_ROOT / "data" / "openings" / "arena_openings.pgn"

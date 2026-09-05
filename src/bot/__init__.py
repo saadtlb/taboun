@@ -1,15 +1,15 @@
-from bot.tabounv1 import tabounV1
-from bot.tabounv2 import tabounV2
-from bot.tabounv3 import tabounV3
-from bot.tabounv4 import tabounV4
-from bot.tabounv5 import tabounV5
-from bot.tabounv6 import tabounV6
-from bot.tabounv7 import tabounV7
-from bot.tabounv8 import tabounV8
-from bot.tabounv9 import tabounV9
-from bot.tabounv10 import tabounV10
-from bot.tabounv11 import tabounV11
-from bot.tabounv12 import tabounV12
+from src.bot.tabounv1 import tabounV1
+from src.bot.tabounv2 import tabounV2
+from src.bot.tabounv3 import tabounV3
+from src.bot.tabounv4 import tabounV4
+from src.bot.tabounv5 import tabounV5
+from src.bot.tabounv6 import tabounV6
+from src.bot.tabounv7 import tabounV7
+from src.bot.tabounv8 import tabounV8
+from src.bot.tabounv9 import tabounV9
+from src.bot.tabounv10 import tabounV10
+from src.bot.tabounv11 import tabounV11
+from src.bot.tabounv12 import tabounV12
 
 BOT_REGISTRY = {
     "tabounv1": tabounV1,

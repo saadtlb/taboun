@@ -22,7 +22,7 @@ from src.arena.run_tournament import (
     sha256_file,
     write_json_atomic,
 )
-from bot import BOT_REGISTRY
+from src.bot import BOT_REGISTRY
 
 
 DEFAULT_ELO0 = 0.0

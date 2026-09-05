@@ -105,7 +105,7 @@ pip install python-chess
 ## cli
 
 ```bash
-python src/main.py
+python -m src.main
 ```
 
 You will be prompted for:

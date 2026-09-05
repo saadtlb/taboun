@@ -2,8 +2,8 @@ from threading import Event
 
 import chess
 
-from bot.time_control import SearchDeadline, SearchTimeout, check_time, make_deadline
-from evaluation.simplified_evaluation_function import evaluate_simplified
+from src.bot.time_control import SearchDeadline, SearchTimeout, check_time, make_deadline
+from src.evaluation.simplified_evaluation_function import evaluate_simplified
 
 
 class tabounV5:

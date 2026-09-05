@@ -9,10 +9,10 @@ from __future__ import annotations
 
 import chess
 
-from evaluation.fast_evaluation_function import evaluate_fast
-from evaluation.improved_evaluation_function import evaluate_improved
-from evaluation.material import evaluate_material
-from evaluation.simplified_evaluation_function import evaluate_simplified
+from src.evaluation.fast_evaluation_function import evaluate_fast
+from src.evaluation.improved_evaluation_function import evaluate_improved
+from src.evaluation.material import evaluate_material
+from src.evaluation.simplified_evaluation_function import evaluate_simplified
 
 
 def evaluation_for_bot(bot_name: str):

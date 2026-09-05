@@ -11,7 +11,7 @@ Callers must therefore only pass positions that are not game over.
 
 import chess
 
-from evaluation.simplified_evaluation_function import (
+from src.evaluation.simplified_evaluation_function import (
     BISHOP_PST,
     KING_ENDGAME_PST,
     KING_MIDGAME_PST,

@@ -15,9 +15,9 @@ from threading import Event
 
 import chess
 
-from bot.time_control import SearchDeadline, SearchTimeout, check_time, make_deadline
-from evaluation.fast_evaluation_function import evaluate_fast
-from opening.book import choose_book_move
+from src.bot.time_control import SearchDeadline, SearchTimeout, check_time, make_deadline
+from src.evaluation.fast_evaluation_function import evaluate_fast
+from src.opening.book import choose_book_move
 
 # Large enough to dominate any positional score, small enough that adding a ply
 # count to it never approaches the float infinities used as initial bounds.
